@@ -1,12 +1,12 @@
 # Slalom Challenge: assignment and evaluation
 
-Design a learning-based controller that takes the provided PyChrono car through eight alternating slalom gates and reaches the finish line as quickly as possible. You choose the trajectory, speed, learning method, and controller. No reference path or reference speed is prescribed for the challenge. The starter controller tracks its own slow path only to demonstrate the software interface.
+Use course methods to take the provided PyChrono car through eight alternating slalom gates and reach the finish line as quickly as possible. In Easy mode, you design a plan for the supplied tracker; in Full mode, you design the vehicle controller. No reference path or reference speed is prescribed. The starter controller tracks its own slow path only to demonstrate the software interface.
 
 This is an **individual** assignment for the 2026 *Learning-Based Control for Mobility Systems* course. Your report and implementation must show how your design uses course concepts such as problem formulation, DP/VI/PI, value or policy approximation, rollout, or multistep lookahead. You do not need to use every method. A generic RL package applied without a course-based controller design and explanation receives zero credit.
 
 | Milestone | Korea Standard Time (UTC+09:00) |
 |---|---|
-| Release | October 1, 2026, 13:00 |
+| Official course announcement | October 1, 2026, 13:00 |
 | Submission deadline | November 1, 2026, 23:59 |
 | Race results and individual questions in class | November 3, 2026; about five minutes per student |
 
@@ -80,6 +80,6 @@ You submit **one ZIP containing your PDF report and runnable solution**. The sol
 - **Basic-course performance:** A successful run is scored by finish time against absolute-time thresholds, not by class rank. Numerical thresholds and point allocation will be announced separately.
 - **Failure:** A failed run receives the minimum performance score.
 - **Course-based design and understanding:** The code, report, and November 3 individual discussion are used to assess your method and your ability to explain it. Report length itself is not graded.
-- **Bonus:** A changed-cone-spacing track can add points to the basic score. The detailed scenarios and bonus cap will be announced with the scoring table. Submit the **same controller code, design, and learned object or weights** as for the basic course. Only the cone-spacing parameter may change; the new spacing may be passed to and used by the unchanged controller or learned object. Retraining, replacing learned weights, or switching controllers for the bonus run is not allowed. Starting-pose variation is not a bonus task.
+- **Full-mode bonus:** A changed-cone-spacing track can add points to a Full-mode basic score. Easy mode's fixed plan file is not a bonus entry. The detailed scenarios and bonus cap will be announced with the scoring table. Use the **same controller code, design, and learned object or weights** as on the basic course. Only the cone-spacing parameter may change; the unchanged controller or learned object may use it as an input. Retraining, replacing weights, or switching controllers is not allowed. Starting-pose variation is not a bonus task.
 
-If a simulator or scoring issue appears, email the TA with the repository version, run command, scenario, seed, `result.json`, and a minimal reproducer. [Troubleshooting](TROUBLESHOOTING.md) will be updated as issues are confirmed.
+If a simulator or scoring issue appears, use the report checklist in [Troubleshooting](TROUBLESHOOTING.md). Confirmed issues and workarounds will be posted there.

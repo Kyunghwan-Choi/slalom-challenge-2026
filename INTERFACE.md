@@ -29,7 +29,7 @@ A new controller is constructed and `reset` is called once per episode, after th
 
 The `scenario` dictionary contains the entries of [`course.json`](course.json), `mode="full"`, and a `cones` list. Each cone has `x` and `y` coordinates in metres and `pass_sign`, which is `+1` for a required +Y pass or `-1` for a required −Y pass. `finish_x_m`, road and gate geometry, limits, and friction are also present. A single unchanged controller may read the spacing parameter for bonus scenarios. A reference trajectory is **not** supplied.
 
-For local spacing experiments, copy the course file and change `cone_spacing_m` and `finish_x_m`. You may also specify `"cone_centers_m": [[x_0,y_0], ..., [x_7,y_7]]` for nonuniform spacing, with strictly increasing X coordinates and the same Y coordinate for every cone. The required pass side still alternates with cone index. The basic scored layout remains the shipped [`course.json`](course.json); the official bonus changes cone spacing only, and its distribution will be announced separately. Keep the controller code and learned object or weights identical across basic and bonus runs; the changed spacing may be passed to them as an input.
+For local spacing experiments, copy the course file, assign a new `scenario_id`, and change `cone_spacing_m` and `finish_x_m`. You may also specify `"cone_centers_m": [[x_0,y_0], ..., [x_7,y_7]]` for nonuniform local experiments; X coordinates must strictly increase and precede the finish, while Y coordinates may vary. When present, this list overrides `cone_spacing_m` for cone placement. The required pass side still alternates with cone index. The basic scored layout remains the shipped [`course.json`](course.json); the official **Full-mode-only** bonus changes cone spacing only, and its distribution will be announced separately. Keep the copied course JSON with your run results. Keep the Full-mode controller code and learned object or weights identical across basic and bonus runs; the changed spacing may be passed to them as an input.
 
 ### Observation
 
@@ -58,7 +58,7 @@ Global +X is the course direction, and +Y is initially left of the car. `vx_COM`
 
 ### Action and actuator adapter
 
-`act` returns **exactly** `{"steering": number, "acceleration": number}`. Both entries must be finite Python `int` or `float` values; booleans, NumPy scalar types unless converted with `float(...)`, missing/extra keys, NaN, infinity, and requests outside the stated command ranges cause `controller_error`. This validation is separate from physical actuator saturation below.
+`act` returns **exactly** `{"steering": number, "acceleration": number}`. Both entries must pass the finite Python `int`/`float` check; cast NumPy results with `float(...)` to avoid type-dependent behavior. Booleans, missing or extra keys, NaN, infinity, and requests outside the command ranges cause `controller_error`. This validation is separate from physical actuator saturation below.
 
 | Key | Range | Interpretation |
 |---|---:|---|
