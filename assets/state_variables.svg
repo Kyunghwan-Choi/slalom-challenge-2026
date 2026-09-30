@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Physical meaning of the seven vehicle state variables</title>
+  <desc id="desc">Top-view schematic. The global coordinates X REF and Y REF locate the vehicle reference point. Heading psi is measured counterclockwise from global X to vehicle body x. Body-frame forward and lateral speeds v x and v y are measured at the center of mass. Yaw rate r is the rate of heading change, and delta is the mean front-wheel steering angle relative to body x. The body axes are called x and y, while global axes are capital X and Y.</desc>
+  <defs>
+    <marker id="globalArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9 Z" fill="#2563eb"/></marker>
+    <marker id="bodyArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9 Z" fill="#7c3aed"/></marker>
+    <marker id="positionArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9 Z" fill="#0f766e"/></marker>
+    <marker id="velocityArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M1 1 L9 5 L1 9 Z" fill="#059669"/></marker>
+    <marker id="turnArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9 Z" fill="#d97706"/></marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f6f9fd"/>
+  <text x="48" y="54" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17263c">The seven-state vehicle model</text>
+  <text x="50" y="86" font-family="Arial,sans-serif" font-size="18" fill="#52647a">Top view; arrows explain definitions and are not drawn to scale</text>
+
+  <rect x="40" y="110" width="890" height="600" rx="18" fill="#fff" stroke="#d5e0ee" stroke-width="2"/>
+  <text x="66" y="153" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#17263c">Position and heading</text>
+
+  <!-- Capital letters denote the fixed global frame. -->
+  <circle cx="145" cy="628" r="5" fill="#2563eb"/>
+  <path d="M145 628 H868 M145 628 V203" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#globalArrow)"/>
+  <text x="875" y="636" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#1d4ed8">X</text>
+  <text x="135" y="192" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#1d4ed8">Y</text>
+  <text x="124" y="655" font-family="Arial,sans-serif" font-size="17" fill="#1d4ed8">O</text>
+
+  <!-- The REF point is forward of the COM on the body x axis. -->
+  <g transform="rotate(-18 560 337)">
+    <rect x="380" y="266" width="360" height="142" rx="13" fill="#e8f1fb" stroke="#6d8db1" stroke-width="2"/>
+    <path d="M402 299 Q413 283 440 282 H677 Q713 286 728 315 V359 Q712 387 678 391 H439 Q411 388 402 371 Z" fill="#aec3d9" stroke="#4b6684" stroke-width="2"/>
+    <path d="M490 282 H641 Q663 287 674 306 V371 Q663 385 641 391 H490 Q511 337 490 282 Z" fill="#e4eff7" stroke="#63809e" stroke-width="2"/>
+    <rect x="427" y="258" width="49" height="17" rx="5" fill="#344a64"/>
+    <rect x="661" y="258" width="49" height="17" rx="5" fill="#344a64"/>
+    <rect x="427" y="399" width="49" height="17" rx="5" fill="#344a64"/>
+    <rect x="661" y="399" width="49" height="17" rx="5" fill="#344a64"/>
+  </g>
+
+  <!-- Dashed projection to the global axes defines the two position states. -->
+  <path d="M665 303 V628" fill="none" stroke="#0f766e" stroke-width="2" stroke-dasharray="7 7"/>
+  <path d="M145 653 H665 M691 628 V303" fill="none" stroke="#0f766e" stroke-width="3" marker-end="url(#positionArrow)"/>
+  <text x="342" y="680" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#0f766e">X<tspan baseline-shift="sub" font-size="15">REF</tspan></text>
+  <rect x="696" y="449" width="94" height="32" rx="5" fill="#fff"/>
+  <text x="703" y="473" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#0f766e">Y<tspan baseline-shift="sub" font-size="15">REF</tspan></text>
+
+  <!-- Lower-case letters denote the moving body frame, located at COM. -->
+  <path d="M560 337 L801 259 M560 337 L505 168" fill="none" stroke="#7c3aed" stroke-width="3" marker-end="url(#bodyArrow)"/>
+  <text x="805" y="265" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="#6d28d9">x (forward)</text>
+  <text x="475" y="177" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="#6d28d9">y (left)</text>
+  <path d="M560 337 H629" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M620 337 A60 60 0 0 0 617 319" fill="none" stroke="#d97706" stroke-width="3"/>
+  <text x="628" y="330" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#b45309">&#x03C8;</text>
+  <circle cx="560" cy="337" r="9" fill="#059669" stroke="#fff" stroke-width="3"/>
+  <circle cx="665" cy="303" r="9" fill="#e45745" stroke="#fff" stroke-width="3"/>
+  <rect x="495" y="352" width="68" height="29" rx="5" fill="#fff" fill-opacity=".96"/>
+  <text x="503" y="374" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#047857">COM</text>
+  <rect x="669" y="273" width="59" height="28" rx="5" fill="#fff" fill-opacity=".96"/>
+  <text x="676" y="294" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#bd3a29">REF</text>
+  <text x="66" y="692" font-family="Arial,sans-serif" font-size="14" fill="#52647a">REF is 1.371 m ahead of COM.</text>
+
+  <rect x="950" y="110" width="510" height="600" rx="18" fill="#fff" stroke="#d5e0ee" stroke-width="2"/>
+  <text x="976" y="153" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#17263c">Motion and steering</text>
+  <text x="976" y="180" font-family="Arial,sans-serif" font-size="16" fill="#52647a">Velocity components are at COM, in body axes.</text>
+  <path d="M1085 389 H1398 M1085 389 V221" fill="none" stroke="#7c3aed" stroke-opacity=".5" stroke-width="2.5" marker-end="url(#bodyArrow)"/>
+  <text x="1405" y="396" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#6d28d9">x</text>
+  <text x="1076" y="211" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#6d28d9">y</text>
+  <path d="M1085 389 H1285 M1085 389 V268" fill="none" stroke="#059669" stroke-width="6" marker-end="url(#velocityArrow)"/>
+  <text x="1180" y="377" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#047857">v<tspan baseline-shift="sub" font-size="15">x</tspan></text>
+  <text x="1097" y="310" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#047857">v<tspan baseline-shift="sub" font-size="15">y</tspan></text>
+  <circle cx="1085" cy="389" r="9" fill="#059669" stroke="#fff" stroke-width="3"/>
+  <text x="987" y="417" font-family="Arial,sans-serif" font-size="16" fill="#52647a">COM</text>
+
+  <path d="M976 447 H1434" stroke="#d5e0ee" stroke-width="1.5"/>
+  <text x="976" y="479" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#17263c">Yaw rate</text>
+  <circle cx="1060" cy="568" r="34" fill="#e8f1fb" stroke="#6d8db1" stroke-width="2"/>
+  <path d="M1104 595 A55 55 0 1 0 1006 567" fill="none" stroke="#d97706" stroke-width="4" marker-end="url(#turnArrow)"/>
+  <text x="1130" y="562" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#b45309">r = &#x03C8;&#x0307;</text>
+  <text x="1130" y="592" font-family="Arial,sans-serif" font-size="15" fill="#52647a">positive: counterclockwise</text>
+
+  <text x="976" y="652" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#17263c">Front-wheel angle</text>
+  <path d="M1199 653 H1420" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#bodyArrow)"/>
+  <g transform="rotate(-24 1320 653)">
+    <rect x="1285" y="643" width="70" height="20" rx="6" fill="#344a64"/>
+  </g>
+  <path d="M1362 653 A42 42 0 0 0 1358 636" fill="none" stroke="#d97706" stroke-width="3"/>
+  <text x="1375" y="632" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#b45309">&#x03B4;</text>
+  <text x="1208" y="685" font-family="Arial,sans-serif" font-size="14" fill="#52647a">measured mean angle relative to body +x</text>
+
+  <rect x="40" y="730" width="1420" height="130" rx="18" fill="#fff" stroke="#d5e0ee" stroke-width="2"/>
+  <text x="64" y="764" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#17263c">State vector s = (X<tspan baseline-shift="sub" font-size="12">REF</tspan>, Y<tspan baseline-shift="sub" font-size="12">REF</tspan>, &#x03C8;, v<tspan baseline-shift="sub" font-size="12">x</tspan>, v<tspan baseline-shift="sub" font-size="12">y</tspan>, r, &#x03B4;)</text>
+  <g font-family="Arial,sans-serif" font-size="16" fill="#334155">
+    <text x="64" y="813">X<tspan baseline-shift="sub" font-size="11">REF</tspan>, Y<tspan baseline-shift="sub" font-size="11">REF</tspan>: global position at REF</text>
+    <text x="415" y="813">&#x03C8;: heading angle</text>
+    <text x="665" y="813">v<tspan baseline-shift="sub" font-size="11">x</tspan>, v<tspan baseline-shift="sub" font-size="11">y</tspan>: body-frame COM speeds</text>
+    <text x="1055" y="813">r: yaw rate</text>
+    <text x="1240" y="813">&#x03B4;: front steer</text>
+  </g>
+  <text x="64" y="842" font-family="Arial,sans-serif" font-size="14" fill="#52647a">Positions use the fixed global frame; velocities use the moving body frame. The model state &#x03B4; is the measured wheel angle, not the steering request.</text>
+</svg>

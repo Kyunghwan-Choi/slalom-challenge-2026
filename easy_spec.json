@@ -1,0 +1,18 @@
+{
+  "model": "fixed_time_virtual_ref_lattice_v1",
+  "planning_dt_s": 0.5,
+  "grid_x_m": 1.0,
+  "grid_y_m": 0.5,
+  "maximum_stages": 120,
+  "longitudinal_moves": [1, 2, 3, 4, 5],
+  "lateral_move_min": -4,
+  "lateral_move_max": 4,
+  "maximum_abs_y_m": 3.0,
+  "maximum_segment_speed_m_s": 11.5,
+  "maximum_abs_segment_course_angle_rad": 0.58,
+  "maximum_acceleration_m_s2": 4.0,
+  "maximum_deceleration_m_s2": 6.0,
+  "maximum_course_angle_change_rad": 0.31,
+  "maximum_virtual_lateral_acceleration_m_s2": 6.0,
+  "failure_cost": 1000
+}
