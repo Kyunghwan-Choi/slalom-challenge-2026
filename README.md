@@ -17,7 +17,7 @@ The slow example checks installation and the interface; its path and speed are n
 
 1. [Install](INSTALL.md) the environment.
 2. [Run the slow example](RUNNING.md) and inspect `result.json` and `trajectory.npz`.
-3. Choose a mode, implement your method, and test it with the local runner.
+3. Use [Start here](START_HERE.md) to try the predictor and run data, then develop a method in your chosen mode.
 
 ## Guides
 
@@ -25,6 +25,7 @@ The slow example checks installation and the interface; its path and speed are n
 |---|---|
 | [Assignment](ASSIGNMENT.md) | Rules, dates, scoring |
 | [Installation](INSTALL.md) | Windows x64 setup |
+| [Start here](START_HERE.md) | Predictor, result files, learned artifacts |
 | [Running](RUNNING.md) | Both modes and local tests |
 | [Interface](INTERFACE.md) | Inputs and outputs |
 | [Model](MODEL.md) | Predictor and validation |
