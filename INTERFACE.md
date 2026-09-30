@@ -7,10 +7,10 @@ The local runner offers `easy` and `full` modes on the same PyChrono course. Cho
 Submit a UTF-8 JSON object with exactly one key, `moves`. Its value is a nonempty list of integer pairs `[m,n]`:
 
 ```json
-{"moves": [[1, 0], [2, 1]]}
+{"moves": [[1, 0], [2, 0]]}
 ```
 
-The snippet shows syntax, not a full-course solution. [`easy_spec.json`](easy_spec.json) and [`easy_mode.py`](easy_mode.py) define the fixed grid, action and transition limits, and plan validator. The plan must first reach `finish_x_m` on its last move. The runner's shared lower controller turns accepted plan nodes directly into steering and pedal commands; easy-mode submissions do not implement `Controller.act` or use the full-mode acceleration request interface.
+The snippet shows two feasible initial moves, not a full-course solution; the runner rejects it because it does not reach the finish. [`easy_spec.json`](easy_spec.json) and [`easy_mode.py`](easy_mode.py) define the fixed grid, action and transition limits, and plan validator. The plan must first reach `finish_x_m` on its last move. The runner's shared lower controller turns accepted plan nodes directly into steering and pedal commands; easy-mode submissions do not implement `Controller.act` or use the full-mode acceleration request interface.
 
 ## Full-mode controller lifecycle
 

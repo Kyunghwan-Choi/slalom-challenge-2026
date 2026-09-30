@@ -33,17 +33,17 @@ $$
 
 Here $V$ and $\chi$ are the virtual speed and global course angle of REF along one planned segment. They are **not** exactly the car's center-of-mass speed or body yaw. The model assumes the virtual grid move is achieved exactly; PyChrono then tests how well the shared lower controller can follow it. [`easy_spec.json`](easy_spec.json) contains every action and transition limit, including $|Y|\le3$ m, $V\le11.5$ m/s, $|\chi|\le0.58$ rad, acceleration $\le4$ m/s², deceleration $\le6$ m/s², angle change $\le0.31$ rad, and virtual lateral acceleration $V|\Delta\chi|/0.5\le6$ m/s². At each cone's X plane the planned line segment must cross on the designated side. The virtual plan does not represent the vehicle's full footprint; choose your own safety margin and verify clearance in PyChrono.
 
-The first planned arrival at $X\ge145$ m must occur by stage $K\le120$. Give each valid nonterminal transition stage cost 1, successful termination cost 0, and invalid or unfinished plans cost $M=1000$. A successful plan therefore costs exactly its **arrival stage $K$**. Because all valid moves increase X, the finite grid permits backward DP. A different numerical method is also acceptable; your report should explain your own method. The repository supplies the model, checker, and lower controller, but no DP solver or optimal move sequence.
+The first planned arrival at $X\ge145$ m must occur by stage $K\le120$. Give **every feasible move** stage cost 1, including the move that reaches the finish. The successful terminal state adds no cost; an invalid move or an unfinished plan at the horizon incurs a penalty $M=1000$. Thus a successful plan costs exactly its **arrival stage $K$**, while a failed plan costs at least $M$. Because all valid moves increase X, the finite grid permits backward DP. A different numerical method is also acceptable; your report should explain your own method. The repository supplies the model, checker, and lower controller, but no DP solver or optimal move sequence.
 
 For the side-only virtual gate rule, backward DP found a **31-stage** grid path (15.5 s planned). Its planned lateral separation at each cone is only 0.5 m, so the grid result alone does **not** establish a safe PyChrono run. A separate, deliberately conservative plan using a 2.5 m planning margin took **48 stages** (24.0 s planned); the shared tracker completed the PyChrono course in **24.074 s** and passed all eight gates. Its saved trajectory remains clear under the published COM-centered scoring footprint. The margin is a planning choice in this example, **not an evaluation gate rule**. No claim of real-vehicle optimality follows from either grid result. Tracking error and omitted tire/actuator state mean a grid-feasible plan can still fail in PyChrono.
 
 Write a JSON file with your own full move list:
 
 ```json
-{"moves": [[1, 0], [2, 1]]}
+{"moves": [[1, 0], [2, 0]]}
 ```
 
-The two entries above illustrate syntax only; they do not reach the finish. Each entry must contain two integers. The last entry must be the **first** move that reaches or crosses the finish. Run your complete plan with:
+The two entries above are feasible initial moves and illustrate the JSON format, but they do not reach the finish. The runner therefore rejects this incomplete file; replace it with your own complete plan before running. Each entry must contain two integers. The last entry must be the **first** move that reaches or crosses the finish. Run your complete plan with:
 
 ```powershell
 conda run --no-capture-output -n slalom2026 python .\run_local.py --mode easy --plan .\easy_plan.json --output .\runs\easy
