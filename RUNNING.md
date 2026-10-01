@@ -87,14 +87,14 @@ The supplied predictor uses state $s=(X_{\mathrm{REF}},Y_{\mathrm{REF}},\psi,v_x
 
 $v_x,v_y$ are body-frame COM velocities; $r$ is yaw rate; $\delta$ is measured mean front-wheel steering. The action $u_k=(u_{s,k}^{\rm req},a_{x,k}^{\rm req})$ requests steering and longitudinal acceleration. The runner limits the steering command sent to PyChrono to a change of **0.04 per 0.02 s**; the predictor includes that interface rule and a fitted steering lag, so prediction needs the previously applied steering. A fixed map converts acceleration requests to throttle or brake within speed-dependent limits. Use the model for model-based planning, policy improvement, or candidate-action prediction, then test the resulting controller in PyChrono. [MODEL.md](MODEL.md) explains the equations, coordinates, evidence, and validity range; [dynamics.py](dynamics.py) and [model_parameters.json](model_parameters.json) implement the fitted predictor.
 
-**Requested-action validation** replays recorded Full-mode steering and acceleration requests through `dynamics.predict`. Each 2 s window starts from a measured PyChrono state; the reported errors are at the window endpoint.
+To check the supplied model, [`validate_requests.py`](validate_requests.py) replays steering and acceleration requests recorded during Full-mode PyChrono runs through `dynamics.predict`. Each 2 s prediction starts from a measured PyChrono state; the table reports prediction error after those 2 s. This is a model check, not a controller function.
 
 | PyChrono drive | Windows | Forward-speed RMSE | REF lateral-position RMSE |
 |---|---:|---:|---:|
 | Low-speed starter slalom | 58 | 0.3453 m/s | 0.0983 m |
-| Straight drive to 10.74 m/s, calibration-related | 10 | 0.1184 m/s | 0.0777 m |
+| Straight drive to 10.74 m/s (calibration data) | 10 | 0.1184 m/s | 0.0777 m |
 
-The straight drive is **not** an independent high-speed slalom test. These errors include the complete response to your requested actions; they do not guarantee full-course open-loop accuracy or behavior near handling limits. See the [comparison plot](validation/ax_request_comparison.png), [metrics](validation/ax_request_metrics.json), and [MODEL.md](MODEL.md) for conditions and limitations.
+The straight-drive row checks longitudinal response at higher speed. Both rows use short prediction windows, so accuracy in a fast slalom or over the full course remains unverified. See the [comparison plot](validation/ax_request_comparison.png), [metrics](validation/ax_request_metrics.json), and [MODEL.md](MODEL.md) for the test conditions.
 
 Copy [`controller.py`](controller.py) and implement `Controller.reset` and `Controller.act`. Every 0.02 s, `act` receives an observation and returns steering and acceleration requests. Acceleration may be requested in $[-7,7]$ m/s², but the adapter clips it to the speed-dependent achievable range. [`dynamics.predict`](dynamics.py) includes that conversion for candidate-action evaluation. [INTERFACE.md](INTERFACE.md) defines the lifecycle, units, bounds, and scenario fields.
 
