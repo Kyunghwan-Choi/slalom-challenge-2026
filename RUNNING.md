@@ -24,11 +24,11 @@ Runs are headless by default. Add `--visual` in a Windows graphical session to i
 
 The **planned REF position** at stage $k$ is $(X_k,Y_k)$, initially $(0,0)$, on a grid with $h_X=1$ m and $h_Y=0.5$ m. Every $\Delta=0.5$ s, choose integer moves $m_k\in\{1,2,3,4,5\}$ and $n_k\in\{-4,\ldots,4\}$. The position update is $X_{k+1}=X_k+m_k h_X$ and $Y_{k+1}=Y_k+n_k h_Y$.
 
-The move implies virtual segment speed $V_k=\sqrt{(m_k h_X)^2+(n_k h_Y)^2}/\Delta$ and global course angle $\chi_k=\operatorname{atan2}(n_k h_Y,m_k h_X)$.
+The move implies virtual segment speed $V_k=\sqrt{(m_k h_X)^2+(n_k h_Y)^2}/\Delta$. Its global course angle is χ<sub>k</sub> = atan2(n<sub>k</sub> h<sub>Y</sub>, m<sub>k</sub> h<sub>X</sub>), with lateral displacement first and longitudinal displacement second.
 
-These are not exact COM speed or body yaw. The geometric planning state is $(X_k,Y_k)$, but acceleration and turn limits also need the **previous segment's** $(V_{k-1},\chi_{k-1})$. Carry these two values as auxiliary memory in a DP implementation; initialize both to zero. The grid assumes each move is achieved exactly. PyChrono later tests the actual car and the supplied tracker.
+These are not exact COM speed or body yaw. The basic geometric planning state is $(X_k,Y_k)$. If your DP enforces acceleration or turn limits, also carry the **previous segment's** $(V_{k-1},\chi_{k-1})$ as auxiliary memory, initialized to zero. The grid assumes each move is achieved exactly. PyChrono later tests the actual car and the supplied tracker.
 
-The planning constants come from [easy_spec.json](easy_spec.json); the finish position comes from [course.json](course.json):
+The fixed grid and horizon come from [easy_spec.json](easy_spec.json); the finish position comes from [course.json](course.json). The failure cost $M$ is one possible DP design choice:
 
 | Symbol | Value | Meaning |
 |---|---:|---|
@@ -36,11 +36,11 @@ The planning constants come from [easy_spec.json](easy_spec.json); the finish po
 | $\Delta$ | 0.5 s | Planning stage duration |
 | $K_{\max}$ | 120 | Last allowed arrival stage |
 | $X_F$ | 145 m | Finish line |
-| $M$ | 1000 | Failure cost |
+| $M$ | 1000 | Example failure cost; adjustable in your DP |
 
-A move is **admissible** only if every limit holds:
+The table below gives **suggested starting bounds for your DP**, also listed in [easy_spec.json](easy_spec.json). You may tighten or relax them to explore faster plans. The plan validator does **not** enforce these seven numeric bounds; it enforces the action lattice, stage limit, gate sides, and first finish arrival. PyChrono still enforces its own fixed collision, road, speed, and heading rules. This simplified grid omits the vehicle footprint and tire and actuator dynamics, so a shorter DP plan may fail in PyChrono.
 
-| Planning limit | Condition |
+| Adjustable DP planning bound | Suggested starting value |
 |---|---|
 | Road strip | $\lvert Y_{k+1}\rvert\le3$ m |
 | Segment speed | $V_k\le11.5$ m/s |
@@ -50,27 +50,36 @@ A move is **admissible** only if every limit holds:
 | Angle change | $\lvert\chi_k-\chi_{k-1}\rvert\le0.31$ rad |
 | Virtual lateral acceleration | $V_k\lvert\chi_k-\chi_{k-1}\rvert/\Delta\le6$ m/s² |
 
-At each cone X plane crossed by a planned segment, linearly interpolate the segment's Y coordinate. For cone $j$, the crossing must be strictly on its designated side: $\sigma_j(Y_{\mathrm{cross}}-Y_j)>0$, where $\sigma_j$ is the cone's pass sign and $Y_j$ is its lateral position. This is a **virtual pass-side rule**, not a cone collision test. The grid omits the vehicle footprint; choose a planning clearance margin and verify the resulting path in PyChrono.
+**Every planned gate must be passed on its assigned side.** At cone $j$'s X plane, linearly interpolate the planned segment to obtain $Y_{\mathrm{cross},j}$. The required signed offset is $d_j=\sigma_j(Y_{\mathrm{cross},j}-Y_j)>0$, where $Y_j$ is the cone's lateral position and $\sigma_j$ is +1 for a +Y pass or −1 for a −Y pass. This gate-side rule is mandatory even if you relax all seven suggested planning bounds; a wrong-side plan is rejected before PyChrono runs. You may additionally require a chosen planning margin $d_j\ge d_{\mathrm{plan}}>0$. Neither $d_j>0$ nor a positive planning margin proves that the full vehicle will avoid the cone.
 
-The first arrival at $X\ge X_F$ must occur by stage $K\le K_{\max}$. For a time-minimizing DP, use stage cost $g(z_k,m_k,n_k)=1$ for an admissible move, including the finish move. Set $g(z_k,m_k,n_k)=M$ for a limit or planned-gate violation, and terminate in failure.
+The first arrival at $X\ge X_F$ must occur by stage $K\le K_{\max}$. One time-minimizing DP uses stage cost $g(z_k,m_k,n_k)=1$ for each allowed move, including the finish move. Set $g(z_k,m_k,n_k)=M$ and terminate if a move violates the required gate side or your chosen DP bounds.
 
-Here $z_k=(X_k,Y_k,V_{k-1},\chi_{k-1})$ includes the two constraint-memory values. On first reaching $X_F$, terminate with cost **0**; if stage $K_{\max}$ ends before the finish, assign terminal cost **$M$**. A successful plan therefore costs its stage count $K$; failure costs at least $M$. All moves increase X, so backward DP is possible. Other course-based numerical methods are allowed if explained. The repository supplies the model, checker, and tracker, but no solver or optimal move list. The runner rejects an invalid JSON plan instead of simulating its penalty; $M$ is for your optimization formulation.
+If you use speed and turn bounds, $z_k=(X_k,Y_k,V_{k-1},\chi_{k-1})$ includes the two constraint-memory values; otherwise $(X_k,Y_k)$ can suffice for the virtual gate problem. On first reaching $X_F$, terminate with cost **0**; if stage $K_{\max}$ ends before the finish, assign terminal cost **$M$**. A successful plan therefore costs its stage count $K$; failure costs at least $M$. All moves increase X, so backward DP is possible. Other course-based numerical methods are allowed if explained. The repository supplies the model, checker, and tracker, but no DP solver. The runner rejects a plan that violates a mandatory rule instead of simulating its penalty; $M$ is for your optimization formulation.
 
-For the virtual pass-side gate rule, backward DP found a **31-stage** path (15.5 s planned) with only **0.5 m planned lateral cone separation**. That path was **not verified as safe in PyChrono**. A separate plan with a **2.5 m planning margin** took **48 stages** (24.0 s planned); its tracker passed all eight gates in PyChrono in **24.074 s**, and its saved trajectory clears the published COM-centered scoring footprint. The margin is a planning choice, not an evaluation rule. Tracking error and omitted tire/actuator states can make grid-feasible plans fail.
+The effect of a chosen gate margin is visible in two backward-DP plans that used the table's suggested bounds as DP constraints. Both satisfy the virtual gate rule; their **signed planned offset $d_j$ equals the stated value at every gate**. On the basic course $Y_j=0$, so the planned $Y_{\mathrm{cross},j}$ alternates between $+d_j$ and $-d_j$.
 
-Save **all** planned 0.5 s moves, from the starting position through the first finish-line crossing, in one JSON file. Its structure is:
+| Chosen $d_j$ | Planned stages | PyChrono with the supplied tracker |
+|---:|---:|---|
+| 0.5 m | 31 (15.5 s virtual) | **Cone contact at 3.384 s, before gate 1** |
+| 2.5 m | 48 (24.0 s virtual) | **Success:** 8 gates, finish 24.074 s; minimum scored footprint clearance 0.734 m |
 
-```json
-{"moves": [[1, 0], [2, 0]]}
-```
+The 0.5 m plan passed the *planning* gate-side test but its vehicle footprint hit a cone. The 2.5 m case succeeded in this run; a planning margin is a design choice, not a guarantee or an evaluation rule.
 
-These two initial moves only show the format; the runner rejects this example because it ends before the finish. Each pair contains integers `[m_k, n_k]`, and the last pair must be the **first** to reach or cross the finish. Run your complete plan:
+Save **all** planned 0.5 s moves, from the start through the first finish-line crossing, as one JSON object with exactly one `moves` list. Each entry is an integer pair `[m_k, n_k]`; the last pair must first reach or cross the finish. These complete, independent hand-designed examples show both outcomes without supplying a DP solver or the DP paths above:
+
+| Complete plan file | Planned gate offset | PyChrono result |
+|---|---|---|
+| [Wide 73-stage plan](examples/easy_success_73.json) | 2.5 m at every gate | **Success:** 8 gates, finish 36.548 s; minimum footprint clearance 0.485 m |
+| [Narrow 73-stage plan](examples/easy_failure_73.json) | 0.5 m at every gate | **Cone contact:** 5.341 s, before gate 1 |
+
+The plans use the same longitudinal grid moves. Their differing lateral waypoints show why passing the virtual gate-side test does not establish physical clearance. They demonstrate the file interface; copying an example alone does not meet the assignment's course-based design requirement. Try either complete file directly:
 
 ```powershell
-conda run --no-capture-output -n slalom2026 python .\run_local.py --mode easy --plan .\easy_plan.json --output .\runs\easy
+conda run --no-capture-output -n slalom2026 python .\run_local.py --mode easy --plan .\examples\easy_success_73.json --output .\runs\easy_success
+conda run --no-capture-output -n slalom2026 python .\run_local.py --mode easy --plan .\examples\easy_failure_73.json --output .\runs\easy_failure
 ```
 
-The validator checks the grid, transitions, and planned gates. [easy_mode.py](easy_mode.py) converts accepted nodes to steering and pedals using the same tracker for everyone. The Full-mode acceleration request interface does not change it. Only PyChrono determines actual success, collision, and finish time.
+The second command intentionally returns a nonzero exit code after writing `result.json`. [easy_mode.py](easy_mode.py) checks the fixed lattice, horizon, planned gate sides, and first finish arrival; it converts accepted nodes to steering and pedals using the same tracker for everyone. The Full-mode acceleration request interface does not change Easy mode. Only PyChrono determines actual success, collision, and finish time.
 
 ### Full: vehicle controller
 

@@ -22,9 +22,12 @@ class EasyModeContractTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "gate"):
             validate_plan({"moves": [[1, 0], [1, 0]]}, scenario)
 
-    def test_unreachable_initial_acceleration_is_invalid(self):
-        with self.assertRaisesRegex(ValueError, "transition"):
-            validate_plan({"moves": [[5, 0]]}, {"finish_x_m": 5.0, "cones": []})
+    def test_planning_limits_are_advisory(self):
+        nodes = validate_plan({"moves": [[5, 4], [5, 4]]},
+                              {"finish_x_m": 10.0, "cones": []})
+        self.assertEqual(nodes[-1]["Y"], 4.0)
+        self.assertGreater(nodes[-1]["Y"], 3.0)
+        self.assertGreater(nodes[1]["V"] / 0.5, 4.0)
 
     def test_small_correct_side_crossing_is_planning_valid(self):
         scenario = {"finish_x_m": 5.0, "cones": [{"x": 5.0, "y": 0.0, "pass_sign": 1}]}

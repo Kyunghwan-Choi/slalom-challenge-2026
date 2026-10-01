@@ -4,13 +4,7 @@ Both modes use the same PyChrono course. Choose `--mode easy|full`: Easy reads `
 
 ## Easy plan
 
-Submit a UTF-8 JSON object with exactly one key, `moves`, containing a nonempty list of integer `[m,n]` pairs:
-
-```json
-{"moves": [[1, 0], [2, 0]]}
-```
-
-These are feasible initial moves, not a finished plan; the runner rejects the snippet. The **last move must be the first** to reach `finish_x_m`. [`easy_spec.json`](easy_spec.json) and [`easy_mode.py`](easy_mode.py) define the grid, limits, validator, and shared tracker. Accepted nodes become steering and pedal commands. Easy submissions do not implement `Controller.act` or use Full mode's acceleration request.
+Submit a UTF-8 JSON object with exactly one key, `moves`, containing a nonempty list of integer `[m,n]` pairs. The **last move must be the first** to reach `finish_x_m`. The [complete successful plan](examples/easy_success_73.json) and [complete physical-failure plan](examples/easy_failure_73.json) show the exact format; both pass the virtual plan checks. [`easy_spec.json`](easy_spec.json) defines the fixed grid and suggested DP bounds. [`easy_mode.py`](easy_mode.py) checks the lattice, horizon, gate sides, and finish, then converts accepted nodes to steering and pedal commands. The suggested speed, turn, and road-strip bounds may be adjusted in a student's DP and are not plan-validation rules. PyChrono applies the fixed physical safety rules. Easy submissions do not implement `Controller.act` or use Full mode's acceleration request.
 
 ## Full controller
 
