@@ -29,7 +29,7 @@ if len(rows):
     print("applied steering, throttle, brake:", rows[0, 7:10])
 ```
 
-For row `k`, the state **before** `requested_actions[k]` is `initial_state` when `k=0`, or `rows[k-1, :7]` otherwise. `rows[k, :7]` is the state afterward; `rows[k, 10]` is elapsed simulation time. A terminal event can interrupt a 0.02 s step. Use `result.json` for finish and gate times. If the run stops before creating output files, inspect the terminal error.
+For row `k`, the state **before** `requested_actions[k]` is `initial_state` when $k=0$, or `rows[k-1, :7]` otherwise. `rows[k, :7]` is the state afterward; `rows[k, 10]` is elapsed simulation time. A terminal event can interrupt a 0.02 s step. Use `result.json` for finish and gate times. If the run stops before creating output files, inspect the terminal error.
 
 ## 2. Try one model prediction
 

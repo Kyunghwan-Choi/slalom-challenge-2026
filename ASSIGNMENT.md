@@ -14,13 +14,7 @@ Email submissions and questions to [fairytale@kaist.ac.kr](mailto:fairytale@kais
 
 ## Course and vehicle
 
-In the fixed **global $(X,Y)$ frame**, +X points to the finish and +Y points left when facing +X. The body $x$ axis points forward; body $y$ points left. Heading $\psi$ is counterclockwise from global +X to body-forward. The model's reference point **REF**, at $p_{\rm REF}=(X_{\rm REF},Y_{\rm REF})$, lies 1.371 m ahead of the center of mass **COM**, at $p_{\rm COM}$:
-
-$$
-p_{\rm REF}=p_{\rm COM}+1.371(\cos\psi,\sin\psi)\ {\rm m}.
-$$
-
-REF comes from the PyChrono model; it is also used for gate checks. See the diagrams and [vehicle model](MODEL.md).
+In the fixed **global $(X,Y)$ frame**, +X points to the finish and +Y points left when facing +X. The body $x$ axis points forward; body $y$ points left. Heading $\psi$ is counterclockwise from global +X to body-forward. The model's reference point **REF**, at $p_{\rm REF}=(X_{\rm REF},Y_{\rm REF})$, lies 1.371 m ahead of the center of mass **COM**, at $p_{\rm COM}$: $p_{\rm REF}=p_{\rm COM}+1.371(\cos\psi,\sin\psi)\,\mathrm{m}$. REF comes from the PyChrono model; it is also used for gate checks. See the diagrams and [vehicle model](MODEL.md).
 
 ![Top view of the eight-cone course, alternating gates, road boundary, and finish line](assets/course_layout.svg)
 
@@ -51,29 +45,14 @@ The speed and heading bounds keep the task within the intended forward-slalom op
 
 ## Conceptual problem formulation
 
-The evaluation task is a constrained free-final-time control problem. Let $\xi$ denote the full vehicle state, $u$ the controller command, $\mathcal C$ the course, and $t_j$ the forward crossing time of cone $j$'s X plane. Conceptually,
+The evaluation task is a constrained free-final-time control problem. Let $\xi$ denote the full vehicle state, $u$ the controller command, $\mathcal C$ the course, and $t_j$ the forward crossing time of cone $j$'s X plane. Conceptually, **minimize the finish time $t_f$** over $u(\cdot)$ and $t_f$, subject to:
 
-$$
-\begin{aligned}
-\min_{u(\cdot),\,t_f}\quad &t_f\\
-\text{s.t.}\quad
-&\xi(0)=\xi_{\rm settled},\qquad
-  \dot\xi(t)=F_{\rm vehicle}(\xi(t),u(t);\mu,\mathcal C),\\
-&u(t)\in\mathcal U,\quad
-  -1\le v_x(t)\le12\ {\rm m/s},\quad
-  \dot X_{\rm REF}(t)\le12\ {\rm m/s},\quad
-  |\psi(t)|\le1.3\ {\rm rad},\\
-&\text{the complete vehicle footprint stays on the road and touches no cone for }t\in[0,t_f],\\
-&t_0>0,\quad t_j<t_{j+1}\ (j=0,\ldots,6),\quad t_7<t_f,\\
-&X_{\rm REF}(t_j)=X_j,\quad
-  \dot X_{\rm REF}(t_j)>0,\quad
-  \sigma_j\bigl(Y_{\rm REF}(t_j)-Y_j\bigr)>0
-  \quad(j=0,\ldots,7),\\
-&X_{\rm REF}(t_f)=X_{\rm finish},\quad
-  \dot X_{\rm REF}(t_f)>0,\quad
-  t_f\le60\ {\rm s}.
-\end{aligned}
-$$
+- Initial condition and vehicle dynamics: $\xi(0)=\xi_{\rm settled}$ and $\dot\xi(t)=F_{\rm vehicle}(\xi(t),u(t);\mu,\mathcal C)$.
+- Command and state bounds: $u(t)\in\mathcal U$, $-1\le v_x(t)\le12\,\mathrm{m/s}$, $\dot X_{\rm REF}(t)\le12\,\mathrm{m/s}$, and $|\psi(t)|\le1.3\,\mathrm{rad}$.
+- Collision and road constraints: the complete vehicle footprint stays on the road and touches no cone for $t\in[0,t_f]$.
+- Ordered gate times: $t_0>0$, $t_j<t_{j+1}$ for $j=0,\ldots,6$, and $t_7<t_f$.
+- Forward crossings on the required sides: $X_{\rm REF}(t_j)=X_j$, $\dot X_{\rm REF}(t_j)>0$, and $\sigma_j\bigl(Y_{\rm REF}(t_j)-Y_j\bigr)>0$ for $j=0,\ldots,7$.
+- Finish: $X_{\rm REF}(t_f)=X_{\rm finish}$, $\dot X_{\rm REF}(t_f)>0$, and $t_f\le60\,\mathrm{s}$.
 
 Here $(X_j,Y_j)$ is cone $j$'s center; $\sigma_j=+1$ for +Y and $-1$ for −Y. In Full mode, $u=(u_s^{\rm req},a_x^{\rm req})$ requests steering and longitudinal acceleration, with $\mathcal U=[-0.8,0.8]\times[-7,7\,\mathrm{m/s^2}]$. The adapter converts requests to vehicle inputs with speed-dependent saturation. [`course.json`](course.json), the [interface](INTERFACE.md), and local runner define exact discrete limits and event checks. PyChrono is the evaluation plant; the supplied control-oriented model is an approximation for design. Course methods may use a different training objective or problem formulation, provided the resulting solution is tested against these evaluation rules. Easy mode's finite-horizon DP is a simplified version of this task.
 

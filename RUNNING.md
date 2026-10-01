@@ -22,19 +22,9 @@ Runs are headless by default. Add `--visual` in a Windows graphical session to i
 
 ### Easy: finite-horizon DP
 
-The **planned REF position** at stage $k$ is $(X_k,Y_k)$, initially $(0,0)$, on a grid with $h_X=1$ m and $h_Y=0.5$ m. Every $\Delta=0.5$ s, choose integer move $(m_k,n_k)$:
+The **planned REF position** at stage $k$ is $(X_k,Y_k)$, initially $(0,0)$, on a grid with $h_X=1$ m and $h_Y=0.5$ m. Every $\Delta=0.5$ s, choose integer moves $m_k\in\{1,2,3,4,5\}$ and $n_k\in\{-4,\ldots,4\}$. The position update is $X_{k+1}=X_k+m_k h_X$ and $Y_{k+1}=Y_k+n_k h_Y$.
 
-$$
-m_k\in\{1,2,3,4,5\},\quad n_k\in\{-4,\ldots,4\},
-\qquad X_{k+1}=X_k+m_k h_X,\quad Y_{k+1}=Y_k+n_k h_Y.
-$$
-
-The move implies virtual segment speed and global course angle:
-
-$$
-V_k=\frac{\sqrt{(m_k h_X)^2+(n_k h_Y)^2}}{\Delta},\qquad
-\chi_k=\operatorname{atan2}(n_k h_Y,m_k h_X).
-$$
+The move implies virtual segment speed $V_k=\sqrt{(m_k h_X)^2+(n_k h_Y)^2}/\Delta$ and global course angle $\chi_k=\operatorname{atan2}(n_k h_Y,m_k h_X)$.
 
 These are not exact COM speed or body yaw. The geometric planning state is $(X_k,Y_k)$, but acceleration and turn limits also need the **previous segment's** $(V_{k-1},\chi_{k-1})$. Carry these two values as auxiliary memory in a DP implementation; initialize both to zero. The grid assumes each move is achieved exactly. PyChrono later tests the actual car and the supplied tracker.
 
@@ -60,19 +50,11 @@ A move is **admissible** only if every limit holds:
 | Angle change | $\lvert\chi_k-\chi_{k-1}\rvert\le0.31$ rad |
 | Virtual lateral acceleration | $V_k\lvert\chi_k-\chi_{k-1}\rvert/\Delta\le6$ m/s² |
 
-At each cone X plane crossed by a planned segment, linearly interpolate the segment's Y coordinate. The crossing must be strictly on the cone's designated side: `pass_sign * (Y_cross - Y_cone) > 0`. This is a **virtual pass-side rule**, not a cone collision test. The grid omits the vehicle footprint; choose a planning clearance margin and verify the resulting path in PyChrono.
+At each cone X plane crossed by a planned segment, linearly interpolate the segment's Y coordinate. For cone $j$, the crossing must be strictly on its designated side: $\sigma_j(Y_{\mathrm{cross}}-Y_j)>0$, where $\sigma_j$ is the cone's pass sign and $Y_j$ is its lateral position. This is a **virtual pass-side rule**, not a cone collision test. The grid omits the vehicle footprint; choose a planning clearance margin and verify the resulting path in PyChrono.
 
-The first arrival at $X\ge X_F$ must occur by stage $K\le K_{\max}$. A stage cost consistent with this time-minimization task is
+The first arrival at $X\ge X_F$ must occur by stage $K\le K_{\max}$. For a time-minimizing DP, use stage cost $g(z_k,m_k,n_k)=1$ for an admissible move, including the finish move. Set $g(z_k,m_k,n_k)=M$ for a limit or planned-gate violation, and terminate in failure.
 
-$$
-g(z_k,m_k,n_k)=
-\begin{cases}
-1, & \text{admissible move, including the finish move},\\
-M, & \text{limit or planned gate violation; terminate in failure},
-\end{cases}
-$$
-
-where $z_k=(X_k,Y_k,V_{k-1},\chi_{k-1})$ includes the two constraint-memory values. On first reaching $X_F$, terminate with cost **0**; if stage $K_{\max}$ ends before the finish, assign terminal cost **$M$**. A successful plan therefore costs its stage count $K$; failure costs at least $M$. All moves increase X, so backward DP is possible. Other course-based numerical methods are allowed if explained. The repository supplies the model, checker, and tracker, but no solver or optimal move list. The runner rejects an invalid JSON plan instead of simulating its penalty; $M$ is for your optimization formulation.
+Here $z_k=(X_k,Y_k,V_{k-1},\chi_{k-1})$ includes the two constraint-memory values. On first reaching $X_F$, terminate with cost **0**; if stage $K_{\max}$ ends before the finish, assign terminal cost **$M$**. A successful plan therefore costs its stage count $K$; failure costs at least $M$. All moves increase X, so backward DP is possible. Other course-based numerical methods are allowed if explained. The repository supplies the model, checker, and tracker, but no solver or optimal move list. The runner rejects an invalid JSON plan instead of simulating its penalty; $M$ is for your optimization formulation.
 
 For the virtual pass-side gate rule, backward DP found a **31-stage** path (15.5 s planned) with only **0.5 m planned lateral cone separation**. That path was **not verified as safe in PyChrono**. A separate plan with a **2.5 m planning margin** took **48 stages** (24.0 s planned); its tracker passed all eight gates in PyChrono in **24.074 s**, and its saved trajectory clears the published COM-centered scoring footprint. The margin is a planning choice, not an evaluation rule. Tracking error and omitted tire/actuator states can make grid-feasible plans fail.
 
@@ -92,12 +74,7 @@ The validator checks the grid, transitions, and planned gates. [easy_mode.py](ea
 
 ### Full: vehicle controller
 
-The supplied predictor uses
-
-$$
-s=(X_{\mathrm{REF}},Y_{\mathrm{REF}},\psi,v_x,v_y,r,\delta),
-\qquad \hat s_{k+1}=F_{\mathrm{red}}(s_k,u_k,u_{s,k-1}^{\mathrm{applied}};\Delta t=0.02\,{\rm s},\mu=0.9).
-$$
+The supplied predictor uses state $s=(X_{\mathrm{REF}},Y_{\mathrm{REF}},\psi,v_x,v_y,r,\delta)$ and transition $\hat s_{k+1}=F_{\mathrm{red}}(s_k,u_k,u_{s,k-1}^{\mathrm{applied}};\Delta t=0.02\,\mathrm{s},\mu=0.9)$.
 
 $v_x,v_y$ are body-frame COM velocities; $r$ is yaw rate; $\delta$ is measured mean front-wheel steering. The action $u_k=(u_{s,k}^{\rm req},a_{x,k}^{\rm req})$ requests steering and longitudinal acceleration. The runner limits the steering command sent to PyChrono to a change of **0.04 per 0.02 s**; the predictor includes that interface rule and a fitted steering lag, so prediction needs the previously applied steering. A fixed map converts acceleration requests to throttle or brake within speed-dependent limits. Use the model for model-based planning, policy improvement, or candidate-action prediction, then test the resulting controller in PyChrono. [MODEL.md](MODEL.md) explains the equations, coordinates, evidence, and validity range; [dynamics.py](dynamics.py) and [model_parameters.json](model_parameters.json) implement the fitted predictor.
 
