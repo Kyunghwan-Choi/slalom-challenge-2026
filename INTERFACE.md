@@ -29,7 +29,7 @@ The runner constructs a new controller and calls `reset` once per episode, after
 
 `scenario` includes [`course.json`](course.json) entries, `mode="full"`, and `cones`. Each cone has metre-valued `x`, `y`, and `pass_sign`: `+1` requires a +Y pass, `-1` a −Y pass. The dictionary also provides finish, road and gate geometry, limits, and friction. No reference trajectory is supplied.
 
-For local variations, copy `course.json`, assign a new `scenario_id`, change `cone_spacing_m`, and move `finish_x_m` beyond the last cone. Alternatively, add `"cone_centers_m": [[x_0,y_0], ..., [x_7,y_7]]`: eight finite pairs whose X values strictly increase and precede the finish; Y may vary. The list overrides `cone_spacing_m` for cone placement; pass sides still alternate. Keep the copied JSON with results. The shipped course remains the basic scored layout. The official **Full-mode-only** bonus changes spacing only; its distribution will be announced separately. Use identical controller code and learned object or weights in basic and bonus runs; the unchanged controller or learned object may read spacing as input.
+For local variations, copy `course.json`, assign a new `scenario_id`, change `cone_spacing_m`, and move `finish_x_m` beyond the last cone. Alternatively, add `"cone_centers_m": [[x_0,y_0], ..., [x_7,y_7]]`: eight finite pairs whose X values strictly increase and precede the finish; Y may vary. The list overrides `cone_spacing_m` for cone placement; pass sides still alternate. Keep the copied JSON with results. Only the shipped `course.json` is used for the announced evaluation; these options support local experiments.
 
 ### Observation
 

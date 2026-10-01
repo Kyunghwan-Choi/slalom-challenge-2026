@@ -12,6 +12,8 @@
   <rect x="40" y="115" width="750" height="474" rx="16" fill="#fff" stroke="#d5e0ee" stroke-width="2"/>
   <rect x="812" y="115" width="348" height="474" rx="16" fill="#fff" stroke="#d5e0ee" stroke-width="2"/>
 
+  <!-- Extension lines sit behind the vehicle; the dimension arrow stays below it. -->
+  <path d="M468 352 L522 500 M594 306 L648 454" fill="none" stroke="#718096" stroke-width="1.8" stroke-dasharray="5 5"/>
   <!-- The scoring rectangle and the schematic vehicle rotate about COM. -->
   <g transform="rotate(-20 468 352)">
     <rect x="238" y="259" width="460" height="186" rx="6" fill="#e7f1ff" fill-opacity=".8" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="10 7"/>
@@ -25,15 +27,17 @@
   </g>
 
   <!-- Global frame and body frame. SVG page-up is negative screen y. -->
-  <circle cx="115" cy="525" r="4" fill="#2563eb"/>
-  <path d="M115 525 H239 M115 525 V371" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#globalArrow)"/>
-  <text x="247" y="532" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#1d4ed8">X</text>
-  <text x="104" y="361" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#1d4ed8">Y</text>
-  <text x="98" y="551" font-family="Arial,sans-serif" font-size="16" fill="#1d4ed8">O</text>
-  <text x="152" y="565" font-family="Arial,sans-serif" font-size="15" fill="#52647a">global frame</text>
-  <path d="M468 352 L649 286 M468 352 L414 204" fill="none" stroke="#7c3aed" stroke-width="3.5" marker-end="url(#bodyArrow)"/>
-  <text x="654" y="287" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#6d28d9">x (body forward)</text>
-  <text x="382" y="192" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#6d28d9">y (body left)</text>
+  <circle cx="95" cy="550" r="5" fill="#2563eb"/>
+  <path d="M95 550 H278" fill="none" stroke="#2563eb" stroke-width="4" marker-end="url(#globalArrow)"/>
+  <path d="M95 550 V408" fill="none" stroke="#2563eb" stroke-width="4" marker-end="url(#globalArrow)"/>
+  <text x="286" y="557" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#1d4ed8">X</text>
+  <text x="83" y="397" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#1d4ed8">Y</text>
+  <text x="75" y="579" font-family="Arial,sans-serif" font-size="18" fill="#1d4ed8">O</text>
+  <text x="133" y="579" font-family="Arial,sans-serif" font-size="18" fill="#52647a">global frame</text>
+  <path d="M468 352 L649 286" fill="none" stroke="#7c3aed" stroke-width="4" marker-end="url(#bodyArrow)"/>
+  <path d="M468 352 L414 204" fill="none" stroke="#7c3aed" stroke-width="4" marker-end="url(#bodyArrow)"/>
+  <text x="661" y="280" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#6d28d9">+x</text>
+  <text x="370" y="191" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#6d28d9">+y</text>
   <path d="M468 352 H566" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 5"/>
   <path d="M534 352 A66 66 0 0 0 530 329" fill="none" stroke="#e08d20" stroke-width="3"/>
   <rect x="538" y="320" width="28" height="29" rx="5" fill="#fff" fill-opacity=".9"/>
@@ -46,31 +50,30 @@
   <text x="426" y="385" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#047857">COM</text>
   <rect x="603" y="298" width="56" height="27" rx="5" fill="#fff" fill-opacity=".95"/>
   <text x="609" y="318" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#bd3a29">REF</text>
-  <path d="M468 352 L494 425 M594 306 L620 379" fill="none" stroke="#718096" stroke-width="1.8" stroke-dasharray="5 5"/>
-  <path d="M503 422 L611 382" fill="none" stroke="#475569" stroke-width="2" marker-start="url(#dimArrow)" marker-end="url(#dimArrow)"/>
-  <rect x="530" y="384" width="84" height="27" rx="5" fill="#fff"/>
-  <text x="536" y="404" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#334155">1.371 m</text>
+  <path d="M522 500 L648 454" fill="none" stroke="#475569" stroke-width="2.5" marker-start="url(#dimArrow)" marker-end="url(#dimArrow)"/>
+  <rect x="542" y="463" width="91" height="28" rx="5" fill="#fff"/>
+  <text x="549" y="484" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#334155">1.371 m</text>
 
   <g font-family="Arial,sans-serif" fill="#1d2d43">
     <text x="832" y="158" font-size="20" font-weight="700">Coordinate definitions</text>
-    <text x="832" y="193" font-size="16">Global +X: along the course</text>
-    <text x="832" y="219" font-size="16">Global +Y: left of +X</text>
-    <text x="832" y="261" font-size="16">Body +x: vehicle forward</text>
-    <text x="832" y="287" font-size="16">Body +y: vehicle left</text>
-    <text x="832" y="329" font-size="16">&#x03C8;: counterclockwise heading</text>
-    <text x="832" y="355" font-size="16">from global +X to body +x</text>
-    <text x="832" y="397" font-size="16">p_REF = (X_REF, Y_REF)</text>
-    <text x="832" y="423" font-size="16">p_COM = (X_COM, Y_COM)</text>
-    <text x="832" y="450" font-size="15" fill="#52647a">Both use global coordinates.</text>
+    <text x="832" y="193" font-size="18">Global +X: along the course</text>
+    <text x="832" y="219" font-size="18">Global +Y: left of +X</text>
+    <text x="832" y="261" font-size="18">Body +x: vehicle forward</text>
+    <text x="832" y="287" font-size="18">Body +y: vehicle left</text>
+    <text x="832" y="329" font-size="18">&#x03C8;: counterclockwise heading</text>
+    <text x="832" y="355" font-size="18">from global +X to body +x</text>
+    <text x="832" y="397" font-size="18">p_REF = (X_REF, Y_REF)</text>
+    <text x="832" y="423" font-size="18">p_COM = (X_COM, Y_COM)</text>
+    <text x="832" y="450" font-size="17" fill="#52647a">Both use global coordinates.</text>
   </g>
   <path d="M832 480 H1138" stroke="#d5e0ee" stroke-width="1.5"/>
   <path d="M832 510 H864" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="9 6"/>
-  <text x="874" y="515" font-family="Arial,sans-serif" font-size="15" fill="#334155">Scoring rectangle</text>
-  <text x="832" y="545" font-family="Arial,sans-serif" font-size="15" fill="#334155">4.7 m &#x00D7; 1.9 m, centered on COM</text>
-  <text x="832" y="569" font-family="Arial,sans-serif" font-size="15" fill="#334155">and aligned with the body axes</text>
+  <text x="874" y="515" font-family="Arial,sans-serif" font-size="17" fill="#334155">Scoring rectangle</text>
+  <text x="832" y="545" font-family="Arial,sans-serif" font-size="17" fill="#334155">4.7 m &#x00D7; 1.9 m, centered on COM</text>
+  <text x="832" y="569" font-family="Arial,sans-serif" font-size="17" fill="#334155">and aligned with the body axes</text>
 
   <rect x="40" y="611" width="1120" height="109" rx="16" fill="#fff" stroke="#d5e0ee" stroke-width="2"/>
   <text x="62" y="645" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#17263c">Pose relation in the global frame</text>
   <text x="62" y="678" font-family="Arial,sans-serif" font-size="20" fill="#263c56">p_REF = p_COM + 1.371 (cos &#x03C8;, sin &#x03C8;) m</text>
-  <text x="62" y="705" font-family="Arial,sans-serif" font-size="15" fill="#52647a">Gate and finish crossings use REF; cone overlap and road containment use the oriented scoring rectangle.</text>
+  <text x="62" y="705" font-family="Arial,sans-serif" font-size="17" fill="#52647a">Gate and finish crossings use REF; cone overlap and road containment use the oriented scoring rectangle.</text>
 </svg>

@@ -1,0 +1,62 @@
+{
+  "method": "2 s/1 s/0.5 s open-loop prediction windows restarted from measured states every 0.5 s; logged high-level requests replayed through dynamics.predict",
+  "limits": "Starter slalom and a calibration-related straight probe; neither establishes handling-limit or full-course open-loop accuracy.",
+  "cases": {
+    "starter_slalom": {
+      "trace": "request_starter.npz",
+      "speed_range_m_s": [
+        0.1702276687425772,
+        5.1409464056029215
+      ],
+      "request_range_m_s2": [
+        -0.21141960840438223,
+        3.0
+      ],
+      "metrics": {
+        "0.5_s": {
+          "windows": 61,
+          "vx_endpoint_rmse_m_s": 0.08730904306810786,
+          "y_ref_endpoint_rmse_m": 0.005645772008974255
+        },
+        "1_s": {
+          "windows": 60,
+          "vx_endpoint_rmse_m_s": 0.17315542974414905,
+          "y_ref_endpoint_rmse_m": 0.020950322201489832
+        },
+        "2_s": {
+          "windows": 58,
+          "vx_endpoint_rmse_m_s": 0.3453120697696682,
+          "y_ref_endpoint_rmse_m": 0.09833183399964532
+        }
+      }
+    },
+    "high_speed_straight": {
+      "trace": "request_straight.npz",
+      "speed_range_m_s": [
+        0.1702276687425772,
+        10.739112923966207
+      ],
+      "request_range_m_s2": [
+        0.0,
+        4.0
+      ],
+      "metrics": {
+        "0.5_s": {
+          "windows": 13,
+          "vx_endpoint_rmse_m_s": 0.09474369631521616,
+          "y_ref_endpoint_rmse_m": 0.005335495768457798
+        },
+        "1_s": {
+          "windows": 12,
+          "vx_endpoint_rmse_m_s": 0.10453886320320203,
+          "y_ref_endpoint_rmse_m": 0.019779635860793617
+        },
+        "2_s": {
+          "windows": 10,
+          "vx_endpoint_rmse_m_s": 0.11838862081879992,
+          "y_ref_endpoint_rmse_m": 0.07770981590200877
+        }
+      }
+    }
+  }
+}

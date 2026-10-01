@@ -1,6 +1,6 @@
 # Supplied control-oriented vehicle model
 
-The evaluator uses PyChrono 10.0.0's BMW E90 with TMeasy tires on level rigid terrain. [`dynamics.py`](dynamics.py) is a **reduced predictor** fitted to that plant at road friction $\mu=0.9$: planar nonlinear bicycle dynamics plus a steering actuator. It supports controller design, but does not reproduce every PyChrono state or guarantee behavior at untested limits. The supplied open-loop adapter converts acceleration requests to native pedals. See [Project Chrono's vehicle manual](https://api.projectchrono.org/manual_vehicle.html) for the underlying framework.
+The evaluator uses PyChrono 10.0.0's BMW E90 with TMeasy tires on level rigid terrain. PyChrono drives the car through steering, throttle, and brake inputs. Full mode asks you for **steering and longitudinal-acceleration requests** instead; a supplied fixed conversion sends throttle or brake to PyChrono. This simplifies controller design. [`dynamics.py`](dynamics.py) predicts the response with a reduced planar bicycle model fitted at road friction $\mu=0.9$. It does not reproduce every PyChrono state or guarantee behavior at untested limits. See [Project Chrono's vehicle manual](https://api.projectchrono.org/manual_vehicle.html) for the underlying framework.
 
 ![REF, COM, vehicle heading, and the scored car footprint](assets/ref_com.svg)
 
@@ -33,20 +33,21 @@ Mass is $m=1909.883$ kg and wheelbase is $L=2.776$ m. [`model_parameters.json`](
 
 ## Dynamics and actuator
 
-The Full-mode action $u=(u_s^{\rm req},a_x^{\rm req})$ requests dimensionless steering ($|u_s^{\rm req}|\le0.8$) and longitudinal acceleration ($|a_x^{\rm req}|\le7$ m/s²). The [adapter](INTERFACE.md) limits applied steering $u_s$ to a change of 0.04 per 0.02 s. At the current $v_x$, a fixed **open-loop inverse map** selects throttle $u_t$ or brake $u_b$, each in $[0,0.6]$ and never both nonzero. It has no acceleration feedback or online adaptation.
+The Full-mode action is $u=(u_s^{\rm req},a_x^{\rm req})$: dimensionless steering $|u_s^{\rm req}|\le0.8$ and requested longitudinal acceleration $|a_x^{\rm req}|\le7$ m/s². The runner limits changes in the steering input sent to PyChrono to **0.04 per 0.02 s**. This is an input rule that prevents abrupt commands, **not** a physical lag identified from PyChrono. The model also includes the measured wheel-angle lag below; its one-step prediction needs the previously applied steering input. The same steering input rule applies in Easy mode.
 
-The fitted pedal model gives speed-dependent bounds $a_{\min}(v_x)$ and $a_{\max}(v_x)$. At the **start** of step $k$,
+At the current $v_x$, a fixed **open-loop conversion** chooses throttle $u_t$ or brake $u_b$, each in $[0,0.6]$ and never both nonzero. For model-based control, distinguish the requested $a_x^{\rm req}$ from the reduced model's predicted longitudinal acceleration term $\hat a_x(v_x,u_t,u_b;\mu)$. For forward motion ($v_x\ge0$), at the **start** of step $k$ the conversion chooses pedals so that the fitted static map satisfies
 
 $$
-a_{x,k}^{\rm eff}=\operatorname{clip}\!\left(a_{x,k}^{\rm req},a_{\min}(v_{x,k}),a_{\max}(v_{x,k})\right).
+\hat a_x(v_{x,k},u_{t,k},u_{b,k};\mu)=
+\operatorname{clip}\!\left(a_{x,k}^{\rm req},a_{\min}(v_{x,k}),a_{\max}(v_{x,k})\right).
 $$
 
-Pedals stay fixed for 0.02 s; changing speed can make instantaneous $a_x^{\rm model}(t)$ differ slightly from that initial effective term. [`contract.acceleration_bounds`](contract.py) returns the initial feasible interval. Within it, the inverse of the fitted static map is algebraically one-to-one at fixed forward speed. PyChrono residuals are model-to-plant error, not numerical inversion error. [`dynamics.predict`](dynamics.py) applies this same adapter, so model-based PI or rollout can optimize requests without implementing the pedal inverse.
+The bounds are speed dependent and reported by [`contract.acceleration_bounds`](contract.py). The fitted inverse is algebraically one-to-one at fixed forward speed within those bounds, but **PyChrono may accelerate differently**. If the car rolls backward, the adapter instead commands braking to recover. Pedals stay fixed for 0.02 s, so even the model's $\hat a_x$ may change slightly during a step as $v_x$ changes. There is no feedback correction of acceleration in this conversion. [`dynamics.predict`](dynamics.py) includes it: model-based DP, PI, or rollout can compare requested actions without implementing a pedal map.
 
 The main lateral and yaw equations are
 
 $$
-\dot v_x=a_x^{\rm model}+r v_y-\frac{F_{yf}\sin\delta}{m},\qquad
+\dot v_x=\hat a_x+r v_y-\frac{F_{yf}\sin\delta}{m},\qquad
 \dot v_y=\frac{F_{yf}\cos\delta+F_{yr}}{m}-r v_x,
 $$
 $$
@@ -60,7 +61,14 @@ $$
 \alpha_r=-\operatorname{atan2}(v_y-l_rr,\max(v_x,1)).
 $$
 
-Lateral force is $F_{yi}=F_{i,\mathrm{cap}}\tanh(C_i\alpha_i/F_{i,\mathrm{cap}})$; capacity depends on friction, static axle load, and simplified sharing with longitudinal force. This smooth fit is not an exact tire friction ellipse. The first equation shows why $a_x^{\rm model}$ is **not** $\dot v_x$ during a turn. The pedal map, resistance, and smooth saturation are defined in [`contract.py`](contract.py) and [`dynamics.py`](dynamics.py), with coefficients in [`model_parameters.json`](model_parameters.json).
+Lateral force is $F_{yi}=F_{i,\mathrm{cap}}\tanh(C_i\alpha_i/F_{i,\mathrm{cap}})$; capacity depends on friction, static axle load, and simplified sharing with longitudinal force. This smooth fit is not an exact tire friction ellipse. The first equation shows why $\hat a_x$ is **not** $\dot v_x$ during a turn. The fitted longitudinal term is
+
+$$
+\hat a_x=a_D(v_x,u_t;\mu)-a_B(v_x,u_b;\mu)
+-d_0\tanh(v_x/0.2)-d_2v_x|v_x|+0.35R(v_x),
+$$
+
+where $a_D$ and $a_B$ are the fitted propulsion and braking acceleration terms. Their smooth saturation and coefficients are in [`contract.py`](contract.py), [`dynamics.py`](dynamics.py), and [`model_parameters.json`](model_parameters.json). $R$ is the high-speed correction defined below.
 
 Measured steering follows a fitted speed-dependent *linear* gain and first-order lag:
 
@@ -73,28 +81,34 @@ Below **2 m/s**, the implementation blends the lateral/yaw equations with a kine
 
 ### High-speed correction
 
-A longitudinal correction begins at **9.2 m/s**. Separate straight drive and coast traces calibrated it after the original quadratic drive fit underestimated acceleration near the **12 m/s** course limit. Both inverse adapter and predictor include it. On one independent fast slalom trace, the **2 s fixed-applied-input** forward-speed RMSE fell from **0.760 to 0.183 m/s** and REF lateral RMSE from **0.181 to 0.103 m**. This trace differs from the aggressive maneuver below.
+The longitudinal term $\hat a_x$ above has two corrections. The propulsion term $a_D$ has the form $D\tanh(g(v)u_t^{q_t}/D)$, with drive gain
 
-The correction does not make requested acceleration a guaranteed physical acceleration. In a separate PyChrono straight run near **10.5 m/s**, nominal $a_x^{\rm req}=0$ still increased speed by **0.207 m/s over 2.4 s**. Leave speed margin and test the closed-loop controller in PyChrono near the 12 m/s failure limit.
+$$
+v=\max(v_x,0),\qquad
+g(v)=\max\{0.1,\ a_0+a_1v+a_2v^2,\ 5\mathbf{1}_{\{v\ge9.2\}}\}.
+$$
+
+The added $0.35R(v_x)$ in $\hat a_x$ changes modeled coast/drag. Here $R=0$ below **9.2 m/s**, $R=1$ above **9.5 m/s**, and $R=3z^2-2z^3$ between them with $z=(v_x-9.2)/0.3$. These terms are **longitudinal**; the separate $s_vv_x^2$ term in the steering equation changes steering gain. Straight drive and coast traces calibrated the longitudinal corrections after the earlier fit underestimated propulsion near the **12 m/s** course limit. The same corrected map is used for pedal conversion and prediction.
+
+The correction does not guarantee requested acceleration. In a PyChrono straight run near **10.5 m/s**, $a_x^{\rm req}=0$ still increased speed by **0.207 m/s over 2.4 s**. Leave speed margin and test your controller in PyChrono near the 12 m/s failure limit.
 
 ## Comparison with PyChrono
 
-![PyChrono and provided-model fixed-input replay comparison](validation/model_comparison.png)
+![Forward-speed response to logged Full-mode steering and acceleration requests](validation/ax_request_comparison.png)
 
-The [validation traces and metrics](validation/metrics.json) replay **the same applied steering, throttle, and brake inputs** in PyChrono and the predictor. These results measure vehicle-model error given native inputs; they do **not** establish how accurately the open-loop adapter tracks acceleration requests. Each prediction window lasts 0.5, 1, or 2 s: it starts from a measured state, then runs open loop without further measurement injection. Windows start 0.5 s apart and may overlap. The held-out mixed maneuver was excluded from coefficient fitting; the baseline course maneuver was included. Metrics omit the held-out trace's first 0.8 s. Steering simplification was fitted on calibration traces and checked on disjoint held-out traces, including the aggressive maneuver summarized here.
+The main check replays **logged Full-mode steering and $a_x^{\rm req}$ commands** through [`dynamics.predict`](dynamics.py), including its steering limit and pedal conversion. Every prediction window starts from a measured PyChrono state and runs open loop for 0.5, 1, or 2 s. Windows start 0.5 s apart and can overlap. The plot shows the 2 s forward-speed endpoints.
 
-| Dataset | Horizon | Forward-speed endpoint RMSE | REF lateral-position endpoint RMSE |
-|---|---:|---:|---:|
-| Held-out mixed maneuver | 0.5 s | 0.0371 m/s | 0.0042 m |
-| Held-out mixed maneuver | 1.0 s | 0.0531 m/s | 0.0125 m |
-| Held-out mixed maneuver | 2.0 s | 0.0832 m/s | 0.0382 m |
-| Baseline course maneuver, included in fitting | 0.5 s | 0.0620 m/s | 0.0049 m |
-| Baseline course maneuver, included in fitting | 1.0 s | 0.1204 m/s | 0.0135 m |
-| Baseline course maneuver, included in fitting | 2.0 s | 0.2401 m/s | 0.0560 m |
-| Separate held-out aggressive course maneuver (summary only) | 0.5 s | 0.2071 m/s | 0.0241 m |
-| Separate held-out aggressive course maneuver (summary only) | 1.0 s | 0.3223 m/s | 0.0702 m |
-| Separate held-out aggressive course maneuver (summary only) | 2.0 s | 0.4439 m/s | 0.2111 m |
+| PyChrono drive | Speed range | Horizon | Forward-speed endpoint RMSE | REF lateral endpoint RMSE |
+|---|---:|---:|---:|---:|
+| Supplied 5 m/s slalom | 0.17–5.14 m/s | 0.5 s | 0.0873 m/s | 0.0056 m |
+| Supplied 5 m/s slalom | 0.17–5.14 m/s | 1.0 s | 0.1732 m/s | 0.0210 m |
+| Supplied 5 m/s slalom | 0.17–5.14 m/s | 2.0 s | **0.3453 m/s** | **0.0983 m** |
+| High-speed straight probe | 0.17–10.74 m/s | 0.5 s | 0.0947 m/s | 0.0053 m |
+| High-speed straight probe | 0.17–10.74 m/s | 1.0 s | 0.1045 m/s | 0.0198 m |
+| High-speed straight probe | 0.17–10.74 m/s | 2.0 s | **0.1184 m/s** | **0.0777 m** |
 
-The public `validation/heldout_maneuver_mu0.9.npz` and `validation/course_baseline_maneuver.npz` contain `states` shaped `(N+1,7)`, `actions` shaped `(N,3)`, and 0.02 s samples. Run `validate_model.py` to regenerate their plot and metrics. The aggressive trace's controller and raw trajectory are not supplied. Its high-speed correction lowered 2 s forward-speed error from **0.4925 to 0.4439 m/s**, while REF lateral error rose from **0.1938 to 0.2111 m**.
+The slalom is the supplied example controller's run; the straight probe is related to longitudinal calibration and is **not an independent fast-slalom test**. These figures compare the **response to requested actions** rather than assuming $a_x^{\rm req}=\dot v_x$; in a turn, lateral forces also affect $\dot v_x$. The 2 s starter-speed bias is material for tight cone clearance. Reproduce the table and plot using [`validate_requests.py`](validate_requests.py), the [slalom trace](validation/request_starter.npz), and the [straight trace](validation/request_straight.npz); the numerical summary is in [`ax_request_metrics.json`](validation/ax_request_metrics.json). Matplotlib is needed only to regenerate the plot.
 
-These are **short-window** tests; their errors matter when cone clearance is small. Full-course open-loop replay accumulates error. Accuracy at large sideslip, wheel spin or lock, other friction, and extreme student policies is unverified. The model omits PyChrono's full roll/pitch, gear, engine, wheel, and tire states. Validate the final controller in PyChrono.
+For a separate check of the vehicle equations alone, the repository also includes [fixed-input validation metrics](validation/metrics.json), [plots](validation/model_comparison.png), and [`validate_model.py`](validate_model.py). Those tests give the model exactly the same applied steering and pedals as PyChrono, so their errors do not measure the complete Full-mode command response.
+
+These are **short-window** tests. Full-course open-loop error accumulates; accuracy for fast slaloms, large sideslip, wheel spin or lock, other friction, and extreme student policies is unverified. The model omits PyChrono's full roll/pitch, gear, engine, wheel, and tire states. Validate the final controller in PyChrono.
