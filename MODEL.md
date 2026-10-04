@@ -1,95 +1,139 @@
 # Supplied control-oriented vehicle model
 
-The evaluator uses PyChrono 10.0.0's BMW E90 with TMeasy tires on level rigid terrain. PyChrono drives the car through steering, throttle, and brake inputs. Full mode asks you for **steering and longitudinal-acceleration requests** instead; a supplied fixed conversion sends throttle or brake to PyChrono. This simplifies controller design. [`dynamics.py`](dynamics.py) predicts the response with a reduced planar bicycle model fitted at road friction $\mu=0.9$. It does not reproduce every PyChrono state or guarantee behavior at untested limits. See [Project Chrono's vehicle manual](https://api.projectchrono.org/manual_vehicle.html) for the underlying framework.
+The evaluator uses PyChrono 10.0.0's BMW E90 with TMeasy tires on level rigid terrain. PyChrono takes steering, throttle, and brake inputs. Full mode instead asks you for **steering and longitudinal-acceleration requests**; the supplied input adapter converts them to native inputs. The control-oriented vehicle model in [dynamics.py](dynamics.py) is a reduced planar bicycle model fitted at friction **μ = 0.9**. See [Project Chrono's vehicle manual](https://api.projectchrono.org/manual_vehicle.html) for the underlying framework.
 
-The **runner**, [run_local.py](run_local.py), executes the measured-state feedback loop. The **input adapter** in [contract.py](contract.py) converts controller requests to native vehicle inputs; `dynamics.predict` uses the same conversion when evaluating candidate commands. [Running](RUNNING.md#how-the-system-works) shows the complete system diagrams.
+The **runner**, [run_local.py](run_local.py), executes the measured-state feedback loop. The **input adapter** in [contract.py](contract.py) converts requests to vehicle inputs. `dynamics.predict` includes the same conversion for candidate commands. [Running](RUNNING.md#how-the-system-works) shows both system diagrams.
 
 ![REF, COM, vehicle heading, and the scored car footprint](assets/ref_com.svg)
 
-Global axes are capital $X,Y$; rotating body axes are lowercase $x,y$.
+Global axes are capital X, Y; rotating body axes are lowercase x, y.
 
 ## Coordinates and state
 
-The seven-state vector is $s=(X_{\rm REF},Y_{\rm REF},\psi,v_x,v_y,r,\delta)$.
+The seven-state vector is s = (X<sub>REF</sub>, Y<sub>REF</sub>, ψ, v<sub>x</sub>, v<sub>y</sub>, r, δ).
 
-![Physical meaning of the seven model states: REF position, heading, body velocities, yaw rate, and front-wheel steering](assets/state_variables.svg)
+![Physical meaning of the seven model states, including explicit position and velocity arrowheads and the wheel-direction line defining steering angle](assets/state_variables.svg)
 
-Global +X follows the course and +Y points left. Body $+x$ points forward and $+y$ left. $p_{\rm REF}=(X_{\rm REF},Y_{\rm REF})$ and $p_{\rm COM}=(X_{\rm COM},Y_{\rm COM})$ are **global** positions. Heading $\psi$ is counterclockwise from global +X to body $+x$; $v_x,v_y$ are body-frame COM velocities, $r$ is yaw rate, and $\delta$ is measured mean front-wheel steering. REF lies $a_{\rm REF}=1.371$ m ahead of COM:
+Global +X follows the course and +Y points left. Body +x points forward and +y left. Positions p<sub>REF</sub> = (X<sub>REF</sub>, Y<sub>REF</sub>) and p<sub>COM</sub> = (X<sub>COM</sub>, Y<sub>COM</sub>) use **global** coordinates. Heading ψ is counterclockwise from global +X to body +x; v<sub>x</sub>, v<sub>y</sub> are body-frame COM velocities, r is yaw rate, and δ is measured mean front-wheel steering.
 
-$p_{\rm REF}=p_{\rm COM}+a_{\rm REF}(\cos\psi,\sin\psi)$.
+REF lies a<sub>REF</sub> = 1.371 m ahead of COM:
 
-The corresponding kinematics are:
+p<sub>REF</sub> = p<sub>COM</sub> + a<sub>REF</sub> (cos ψ, sin ψ).
 
-- $\dot X_{\rm REF}=v_x\cos\psi-(v_y+a_{\rm REF}r)\sin\psi$.
-- $\dot Y_{\rm REF}=v_x\sin\psi+(v_y+a_{\rm REF}r)\cos\psi$.
-- $\dot\psi=r$.
+Its kinematics are:
 
-The $a_{\rm REF}r$ term matters in a slalom. Gates and finish use REF; collision scoring uses a **4.7 m × 1.9 m** body-aligned rectangle centered at COM. No third vehicle point is used. A COM planner must transform predicted poses to REF for gate/finish checks and test the oriented footprint against cones and road edges. One fixed COM clearance margin cannot exactly replace those pose-dependent checks.
+- Ẋ<sub>REF</sub> = v<sub>x</sub> cos ψ − (v<sub>y</sub> + a<sub>REF</sub> r) sin ψ.
+- Ẏ<sub>REF</sub> = v<sub>x</sub> sin ψ + (v<sub>y</sub> + a<sub>REF</sub> r) cos ψ.
+- ψ̇ = r.
 
-Mass is $m=1909.883$ kg and wheelbase is $L=2.776$ m. [`model_parameters.json`](model_parameters.json) holds the wheelbase split, steering map, tire stiffness, yaw inertia, and other **fitted effective coefficients**, not independently measured vehicle specifications.
+The a<sub>REF</sub> r term matters in a slalom. Gates and finish use REF; collision scoring uses a **4.7 m × 1.9 m** body-aligned rectangle centered at COM. A COM planner must transform poses to REF for gate/finish checks and test the oriented footprint against cones and road edges. A fixed COM clearance margin cannot exactly replace these pose-dependent checks.
+
+Mass is m = 1909.883 kg and wheelbase is L = 2.776 m. [model_parameters.json](model_parameters.json) contains the wheelbase split, steering map, tire stiffness, yaw inertia, and other **fitted effective coefficients**.
 
 ## Dynamics and actuator
 
-The Full-mode action is $u=(u_s^{\rm req},a_x^{\rm req})$: dimensionless steering $|u_s^{\rm req}|\le0.8$ and requested longitudinal acceleration $|a_x^{\rm req}|\le7$ m/s². The runner limits changes in the steering input sent to PyChrono to **0.04 per 0.02 s**. This is an input rule that prevents abrupt commands, **not** a physical lag identified from PyChrono. The model also includes the measured wheel-angle lag below; its one-step prediction needs the previously applied steering input. The same steering input rule applies in Easy mode.
+### From your command to vehicle motion
 
-At the current $v_x$, a fixed **open-loop conversion** chooses throttle $u_t$ or brake $u_b$, each in $[0,0.6]$ and never both nonzero. For model-based control, distinguish the requested $a_x^{\rm req}$ from the reduced model's predicted longitudinal acceleration term $\hat a_x(v_x,u_t,u_b;\mu)$. For forward motion ($v_x\ge0$), at the **start** of step $k$ the conversion chooses pedals so that the fitted static map satisfies
+1. **Your controller** requests u = (u<sub>s</sub><sup>req</sup>, a<sub>x</sub><sup>req</sup>): steering in [−0.8, 0.8] and acceleration in [−7, 7] m/s².
+2. **The input adapter** limits steering changes and, at the measured v<sub>x</sub>, selects throttle u<sub>t</sub> or brake u<sub>b</sub>. Each pedal lies in [0, 0.6]; both are never nonzero together.
+3. **The vehicle responds** with wheel-angle dynamics and longitudinal/lateral forces. Your next observation measures that response.
 
-$\hat a_x(v_{x,k},u_{t,k},u_{b,k};\mu)=\operatorname{clip}\!\left(a_{x,k}^{\rm req},a_{\min}(v_{x,k}),a_{\max}(v_{x,k})\right)$.
+For model-based planning or policy improvement, call `dynamics.predict(state, command, previous_steering, scenario)`. It implements this complete prediction pipeline; you do not need to implement a pedal inverse yourself.
 
-The bounds are speed dependent and reported by [`contract.acceleration_bounds`](contract.py). The fitted inverse is algebraically one-to-one at fixed forward speed within those bounds, but **PyChrono may accelerate differently**. If the car rolls backward, the input adapter instead commands braking to recover. Pedals stay fixed for 0.02 s, so even the model's $\hat a_x$ may change slightly during a step as $v_x$ changes. There is no feedback correction of acceleration in this conversion. [`dynamics.predict`](dynamics.py) includes it: model-based DP, PI, or rollout can compare requested actions without implementing a pedal map.
+Keep these three longitudinal quantities distinct:
 
-The main longitudinal, lateral, and yaw equations are:
+| Quantity | Meaning |
+|---|---|
+| a<sub>x</sub><sup>req</sup> | Your acceleration request, in m/s² |
+| â<sub>x</sub> | The model's propulsion, braking, and resistance term after pedal conversion |
+| v̇<sub>x</sub> | Change of body-frame forward speed; turning also contributes |
 
-- $\dot v_x=\hat a_x+r v_y-\frac{F_{yf}\sin\delta}{m}$.
-- $\dot v_y=\frac{F_{yf}\cos\delta+F_{yr}}{m}-r v_x$.
-- $\dot r=\frac{l_fF_{yf}\cos\delta-l_rF_{yr}}{I_z}$, with $l_f+l_r=L$.
+### Input conversion
 
-Front/rear slip-angle approximations are $\alpha_f=\delta-\operatorname{atan2}(v_y+l_fr,\max(v_x,1))$ and $\alpha_r=-\operatorname{atan2}(v_y-l_rr,\max(v_x,1))$.
+The runner limits the applied steering input u<sub>s</sub> to a change of **0.04 per 0.02 s**. This interface limit prevents abrupt commands; the wheel-angle lag below is a separate vehicle response. Prediction therefore also needs the previously applied steering input. Easy uses the same steering limit.
 
-Lateral force is $F_{yi}=F_{i,\mathrm{cap}}\tanh(C_i\alpha_i/F_{i,\mathrm{cap}})$; capacity depends on friction, static axle load, and simplified sharing with longitudinal force. This smooth fit is not an exact tire friction ellipse. The first equation shows why $\hat a_x$ is **not** $\dot v_x$ during a turn. The fitted longitudinal term is
+For forward motion, the **open-loop** pedal conversion satisfies the fitted static map at the start of step k:
 
-$\hat a_x=a_D(v_x,u_t;\mu)-a_B(v_x,u_b;\mu)-d_0\tanh(v_x/0.2)-d_2v_x|v_x|+0.35R(v_x)$.
+â<sub>x</sub>(v<sub>x,k</sub>, u<sub>t,k</sub>, u<sub>b,k</sub>; μ) = clip(a<sub>x,k</sub><sup>req</sup>, a<sub>min</sub>(v<sub>x,k</sub>), a<sub>max</sub>(v<sub>x,k</sub>)).
 
-Here $a_D$ and $a_B$ are the fitted propulsion and braking acceleration terms. Their smooth saturation and coefficients are in [`contract.py`](contract.py), [`dynamics.py`](dynamics.py), and [`model_parameters.json`](model_parameters.json). $R$ is the high-speed correction defined below.
+[contract.acceleration_bounds](contract.py) reports these speed-dependent achievable bounds. The inverse is exact for this fitted map within the bounds. **PyChrono can still respond differently** because the map is approximate. Pedals remain fixed for 0.02 s, and there is no acceleration-feedback correction in the input adapter. If v<sub>x</sub> &lt; 0, it commands braking to recover.
 
-Measured steering follows a fitted speed-dependent *linear* gain and first-order lag:
+### Vehicle equations
 
-$\dot\delta=\frac{(s_g+s_vv_x^2)u_s-\delta}{\tau_s}$, with $(s_g,s_v,\tau_s)=(0.551426,-0.00042031,0.007088\ {\rm s})$.
+The longitudinal, lateral, and yaw dynamics are:
 
-Below **2 m/s**, the implementation blends the lateral/yaw equations with a kinematic bicycle response. [`dynamics.py`](dynamics.py) defines capacity floors, smoothing, and midpoint integration. `dynamics.predict(state, command, previous_steering, scenario)` applies the input adapter and predicts one **0.02 s** step from a `{"steering", "acceleration"}` request. Lower-level `dynamics.step` and `dynamics.replay` instead take applied `[steering, throttle, brake]` inputs for reproducible validation traces. `dynamics.parameters()` rejects friction other than **0.9** because other surfaces were not validated. Actual PyChrono acceleration may differ, especially outside measured driving conditions.
+- v̇<sub>x</sub> = â<sub>x</sub> + r v<sub>y</sub> − F<sub>yf</sub> sin δ / m.
+- v̇<sub>y</sub> = (F<sub>yf</sub> cos δ + F<sub>yr</sub>) / m − r v<sub>x</sub>.
+- ṙ = (l<sub>f</sub> F<sub>yf</sub> cos δ − l<sub>r</sub> F<sub>yr</sub>) / I<sub>z</sub>, where l<sub>f</sub> + l<sub>r</sub> = L.
+
+The first equation explains why an acceleration request is not generally equal to v̇<sub>x</sub>. Front/rear slip angles are approximated by:
+
+- α<sub>f</sub> = δ − atan2(v<sub>y</sub> + l<sub>f</sub> r, max(v<sub>x</sub>, 1)).
+- α<sub>r</sub> = −atan2(v<sub>y</sub> − l<sub>r</sub> r, max(v<sub>x</sub>, 1)).
+
+The lateral forces use F<sub>yi</sub> = F<sub>i,cap</sub> tanh(C<sub>i</sub> α<sub>i</sub> / F<sub>i,cap</sub>), for i = f, r. Capacity depends on friction, static axle load, and simplified sharing with longitudinal force. This smooth fit is not an exact tire friction ellipse.
+
+The fitted longitudinal term is:
+
+â<sub>x</sub> = a<sub>D</sub>(v<sub>x</sub>, u<sub>t</sub>; μ) − a<sub>B</sub>(v<sub>x</sub>, u<sub>b</sub>; μ) − d<sub>0</sub> tanh(v<sub>x</sub> / 0.2) − d<sub>2</sub> v<sub>x</sub> |v<sub>x</sub>| + 0.35 R(v<sub>x</sub>).
+
+Here a<sub>D</sub> and a<sub>B</sub> are fitted propulsion and braking terms. [contract.py](contract.py), [dynamics.py](dynamics.py), and [model_parameters.json](model_parameters.json) define the saturation and coefficients. R is the high-speed correction below.
+
+### Steering response and low-speed blending
+
+Measured front-wheel steering follows a speed-dependent gain and first-order lag:
+
+δ̇ = [(s<sub>g</sub> + s<sub>v</sub> v<sub>x</sub>²) u<sub>s</sub> − δ] / τ<sub>s</sub>.
+
+The fitted values are s<sub>g</sub> = 0.551426, s<sub>v</sub> = −0.00042031, and τ<sub>s</sub> = 0.007088 s. The applied dimensionless input u<sub>s</sub> and measured wheel angle δ, in radians, are different quantities.
+
+Below **2 m/s**, the implementation blends the lateral/yaw equations with a kinematic bicycle response. This does not directly modify the longitudinal acceleration map. [dynamics.py](dynamics.py) implements the blend, capacity floors, smoothing, and midpoint integration. `dynamics.predict` predicts one **0.02 s** step from a `{"steering", "acceleration"}` request. Lower-level `dynamics.step` and `dynamics.replay` take applied `[steering, throttle, brake]` inputs. `dynamics.parameters()` rejects friction other than **0.9**, the validated surface.
 
 ### High-speed correction
 
-The longitudinal term $\hat a_x$ above has two corrections. The propulsion term $a_D$ has the form $D\tanh(g(v)u_t^{q_t}/D)$, with $v=\max(v_x,0)$ and drive gain $g(v)=\max\{0.1,\ a_0+a_1v+a_2v^2,\ 5\mathbf{1}_{\{v\ge9.2\}}\}$.
+The propulsion term has the form a<sub>D</sub> = D tanh(g(v) u<sub>t</sub><sup>qₜ</sup> / D), with v = max(v<sub>x</sub>, 0). Here D is the drive saturation capacity and g(v) is the drive gain:
 
-The added $0.35R(v_x)$ in $\hat a_x$ changes modeled coast/drag. Here $R=0$ below **9.2 m/s**, $R=1$ above **9.5 m/s**, and $R=3z^2-2z^3$ between them with $z=(v_x-9.2)/0.3$. These terms are **longitudinal**; the separate $s_vv_x^2$ term in the steering equation changes steering gain. Straight drive and coast traces calibrated the longitudinal corrections after the earlier fit underestimated propulsion near the **12 m/s** course limit. The same corrected map is used for pedal conversion and prediction.
+g(v) = max(0.1, a<sub>0</sub> + a<sub>1</sub> v + a<sub>2</sub> v², H(v)), where H(v) = 5 for v ≥ 9.2 m/s and 0 otherwise.
 
-The correction does not guarantee requested acceleration. In a PyChrono straight run near **10.5 m/s**, $a_x^{\rm req}=0$ still increased speed by **0.207 m/s over 2.4 s**. Leave speed margin and test your controller in PyChrono near the 12 m/s failure limit.
+The added **0.35 R(v<sub>x</sub>)** changes modeled coast/drag. R = 0 below 9.2 m/s and R = 1 above 9.5 m/s. Between them, R = 3z² − 2z³ with z = (v<sub>x</sub> − 9.2) / 0.3. These corrections are **longitudinal**; s<sub>v</sub> v<sub>x</sub>² separately changes steering gain. Straight drive and coast traces calibrated these terms after the earlier fit underestimated propulsion near the **12 m/s** course limit. Pedal conversion and prediction use the same corrected map.
+
+The correction does not make the request an exact PyChrono acceleration. Near 10.5 m/s in a straight drive, a<sub>x</sub><sup>req</sup> = 0 still increased speed by **0.207 m/s over 2.4 s**. Leave speed margin and check your controller near the course limit.
 
 ## Comparison with PyChrono
 
 ![Forward-speed and lateral-position responses to recorded Full-mode commands in two slaloms and a straight drive](validation/ax_request_comparison.png)
 
-The main check replays **recorded Full-mode steering and $a_x^{\rm req}$ commands** through [`dynamics.predict`](dynamics.py), including its steering limit and pedal conversion. Every prediction window starts from a measured PyChrono state and runs open loop for 0.5, 1, or 2 s. Windows start 0.5 s apart and can overlap. The plot shows forward-speed and lateral-position endpoints after 2 s.
+The main check replays recorded steering and acceleration requests through [dynamics.predict](dynamics.py), including steering limits and pedal conversion. Each window starts from a measured state and runs open loop for 0.5, 1, or 2 s. Windows start 0.5 s apart and can overlap. The plot shows **2 s endpoints**.
 
-| PyChrono drive | Speed range | Horizon | Forward-speed endpoint RMSE | REF lateral endpoint RMSE |
-|---|---:|---:|---:|---:|
-| 5 m/s example controller | 0.17–5.14 m/s | 0.5 s | 0.0873 m/s | 0.0056 m |
-| 5 m/s example controller | 0.17–5.14 m/s | 1.0 s | 0.1732 m/s | 0.0210 m |
-| 5 m/s example controller | 0.17–5.14 m/s | 2.0 s | **0.3453 m/s** | **0.0983 m** |
-| Separate 8 m/s slalom | 0.17–8.09 m/s | 0.5 s | 0.0763 m/s | 0.0139 m |
-| Separate 8 m/s slalom | 0.17–8.09 m/s | 1.0 s | 0.1480 m/s | 0.0449 m |
-| Separate 8 m/s slalom | 0.17–8.09 m/s | 2.0 s | **0.2833 m/s** | **0.1596 m** |
-| High-speed straight probe | 0.17–10.74 m/s | 0.5 s | 0.0947 m/s | 0.0053 m |
-| High-speed straight probe | 0.17–10.74 m/s | 1.0 s | 0.1045 m/s | 0.0198 m |
-| High-speed straight probe | 0.17–10.74 m/s | 2.0 s | **0.1184 m/s** | **0.0777 m** |
+<table>
+<thead><tr><th>PyChrono drive</th><th>Speed range (m/s)</th><th>Horizon (s)</th><th>Forward-speed RMSE (m/s)</th><th>REF lateral RMSE (m)</th></tr></thead>
+<tbody>
+<tr><td rowspan="3">5 m/s example controller</td><td rowspan="3">0.17–5.14</td><td>0.5</td><td>0.0873</td><td>0.0056</td></tr>
+<tr><td>1.0</td><td>0.1732</td><td>0.0210</td></tr>
+<tr><td>2.0</td><td><strong>0.3453</strong></td><td><strong>0.0983</strong></td></tr>
+<tr><td rowspan="3">Separate 8 m/s slalom</td><td rowspan="3">0.17–8.09</td><td>0.5</td><td>0.0763</td><td>0.0139</td></tr>
+<tr><td>1.0</td><td>0.1480</td><td>0.0449</td></tr>
+<tr><td>2.0</td><td><strong>0.2833</strong></td><td><strong>0.1596</strong></td></tr>
+<tr><td rowspan="3">High-speed straight probe</td><td rowspan="3">0.17–10.74</td><td>0.5</td><td>0.0947</td><td>0.0053</td></tr>
+<tr><td>1.0</td><td>0.1045</td><td>0.0198</td></tr>
+<tr><td>2.0</td><td><strong>0.1184</strong></td><td><strong>0.0777</strong></td></tr>
+</tbody>
+</table>
 
-The first three rows use the **5 m/s example controller**. The **separate 8 m/s slalom was recorded after the model parameters were fixed** and was not used to refit them. It passed all eight gates in **20.405 s**, with **0.998 m minimum scored footprint clearance**; its [run result](validation/request_fast_slalom_result.json) records the full outcome. The straight probe was used during longitudinal calibration. These figures measure the response to controller requests; in a turn, lateral forces also affect $\dot v_x$, so $a_x^{\rm req}$ is not assumed equal to $\dot v_x$.
+The **separate 8 m/s slalom was recorded with fixed model parameters** and was not used to refit them. It passed all eight gates in **20.405 s**, with **0.998 m minimum scored footprint clearance**; its [run result](validation/request_fast_slalom_result.json) records the outcome. The high-speed straight probe was used during longitudinal calibration.
 
-Reproduce the table and plot with [`validate_requests.py`](validate_requests.py), using the [5 m/s example controller trace](validation/request_starter.npz), [8 m/s trace](validation/request_fast_slalom.npz), and [straight trace](validation/request_straight.npz). The numerical summary is in [`ax_request_metrics.json`](validation/ax_request_metrics.json). Matplotlib is needed only to regenerate the plot.
+Reproduce the table and plot with [validate_requests.py](validate_requests.py), using the [5 m/s example controller trace](validation/request_starter.npz), [8 m/s trace](validation/request_fast_slalom.npz), and [high-speed straight trace](validation/request_straight.npz). [ax_request_metrics.json](validation/ax_request_metrics.json) contains the summary. Matplotlib is needed only to regenerate the plot.
 
-For a separate check of the vehicle equations alone, the repository also includes [fixed-input validation metrics](validation/metrics.json), [plots](validation/model_comparison.png), and [`validate_model.py`](validate_model.py). Those tests give the model exactly the same applied steering and pedals as PyChrono, so their errors do not measure the complete Full-mode command response.
+### Why the 5 m/s speed prediction has a bias
 
-These tests support the model's use for **short-horizon prediction with measured-state feedback** on the level, friction-0.9 slalom course. In the 8 m/s drive, lateral RMSE increases from 0.0139 m at 0.5 s to 0.1596 m at 2 s; that horizon dependence matters when comparing candidate paths near cones. RMSE is an average error measure, not a worst-case safety bound. The reduced state omits roll/pitch, gear, engine, wheel, and tire internal states, so prediction errors depend on the driving conditions.
+The 5 m/s example controller's steady speed is **5.06–5.14 m/s**, where low-speed blending is inactive. After 4 s, 2 s predictions have a mean forward-speed error of **−0.352 m/s**. The residual is mainly a systematic longitudinal-response mismatch, not a low-speed-blending effect.
 
-For your own basic-course Full run, execute `python validate_requests.py --run runs/your_run` in the supplied environment. It writes `model_check.json` with the same horizon-dependent errors. Compare those errors, actual clearance, and the complete driving outcome when choosing model horizon and control settings.
+A separate **zero-steering, 5 m/s straight diagnosis** reproduces the bias: model acceleration averages **−0.179 m/s²**, while measured acceleration is **+0.003 m/s²**. The fitted static inverse error is below **4 × 10⁻¹⁶ m/s²**. Thus the conversion is algebraically accurate for its model, but the fitted propulsion/resistance response differs from PyChrono in this light-throttle regime. This test does not separate propulsion error from resistance error.
+
+The [diagnosis metrics](validation/speed_bias_diagnosis.json) define the sample selection and errors. Its [straight trace](validation/request_straight_5ms.npz) uses the same state/request/applied-input format as the main traces; it deliberately stops at 12 s with cones moved beyond the driven segment. It is a response diagnosis, not a challenge result. The appropriate model improvement is to identify propulsion and coast response around **4–6 m/s and small throttle**, then check separate slalom data. The published parameters are unchanged in this documentation revision.
+
+### Choosing a prediction horizon
+
+The tests support **short-horizon prediction with measured-state feedback** on the friction-0.9 course. In the 8 m/s drive, lateral RMSE rises from 0.0139 m at 0.5 s to 0.1596 m at 2 s. Use the error together with actual clearance when choosing a horizon; RMSE is an average, not a worst-case safety bound. The reduced state omits roll/pitch, gear, engine, wheel, and tire internal states.
+
+For your basic-course Full run, execute `python validate_requests.py --run runs/your_run` in the supplied environment. It writes `model_check.json` with the same horizon-dependent errors. For a separate check of the vehicle equations alone, [fixed-input metrics](validation/metrics.json), [plots](validation/model_comparison.png), and [validate_model.py](validate_model.py) give the model the same applied steering and pedals as PyChrono; these errors exclude the request-conversion step.
