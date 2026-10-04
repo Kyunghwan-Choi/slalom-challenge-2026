@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">From acceleration request to actual vehicle response</title>
+  <desc id="desc">The controller chooses a requested acceleration. The input adapter clips it to speed-dependent fitted-model bounds and inverts the fitted map to choose throttle or brake. PyChrono responds to those pedals. The inverse matches the clipped target in the static fit at the current speed; actual forward acceleration can differ because of model mismatch and turning.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker></defs>
+  <style>text{font-family:Arial,sans-serif;fill:#17263c}.title{font-size:31px;font-weight:700}.heading{font-size:20px;font-weight:700}.body{font-size:18px}.note{font-size:17px}</style>
+  <rect width="1200" height="360" fill="#f6f9fd"/>
+  <text x="48" y="53" class="title">Acceleration request → input adapter → vehicle response</text>
+  <text x="50" y="87" class="note">One Full-mode control interval: 0.02 s; clipping and inversion use the measured speed.</text>
+  <rect x="30" y="126" width="205" height="129" rx="12" fill="#fff" stroke="#d5e0ee" stroke-width="2"/>
+  <rect x="283" y="126" width="260" height="129" rx="12" fill="#edf7f3" stroke="#83b9a4" stroke-width="2"/>
+  <rect x="591" y="126" width="260" height="129" rx="12" fill="#edf7f3" stroke="#83b9a4" stroke-width="2"/>
+  <rect x="899" y="126" width="271" height="129" rx="12" fill="#fff" stroke="#d5e0ee" stroke-width="2"/>
+  <path d="M240 190 H275" fill="none" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M548 190 H583" fill="none" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M856 190 H891" fill="none" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="46" y="159" class="heading">1. Your controller</text>
+  <text x="46" y="196" class="body">Choose a<tspan baseline-shift="sub" font-size="13">x</tspan><tspan baseline-shift="super" font-size="13">req</tspan></text>
+  <text x="46" y="229" class="note">Request in [−7, 7] m/s²</text>
+  <text x="300" y="159" class="heading">2. Clip to fitted bounds</text>
+  <text x="300" y="196" class="body">a<tspan baseline-shift="sub" font-size="13">x</tspan><tspan baseline-shift="super" font-size="13">clip</tspan> = clip(a<tspan baseline-shift="sub" font-size="13">x</tspan><tspan baseline-shift="super" font-size="13">req</tspan>, a<tspan baseline-shift="sub" font-size="13">min</tspan>, a<tspan baseline-shift="sub" font-size="13">max</tspan>)</text>
+  <text x="300" y="229" class="note">Bounds depend on v<tspan baseline-shift="sub" font-size="12">x</tspan></text>
+  <text x="608" y="159" class="heading">3. Invert the fitted map</text>
+  <text x="608" y="196" class="body">Choose throttle u<tspan baseline-shift="sub" font-size="13">t</tspan> or brake u<tspan baseline-shift="sub" font-size="13">b</tspan></text>
+  <text x="608" y="229" class="note">Hold the pedals for 0.02 s</text>
+  <text x="916" y="159" class="heading">4. PyChrono response</text>
+  <text x="916" y="196" class="body">Actual forces change v<tspan baseline-shift="sub" font-size="13">x</tspan></text>
+  <text x="916" y="229" class="note">Measure the next state</text>
+  <text x="50" y="296" class="body">Static fitted map at step start: â<tspan baseline-shift="sub" font-size="13">x</tspan>(v<tspan baseline-shift="sub" font-size="13">x</tspan>, u<tspan baseline-shift="sub" font-size="13">t</tspan>, u<tspan baseline-shift="sub" font-size="13">b</tspan>) = a<tspan baseline-shift="sub" font-size="13">x</tspan><tspan baseline-shift="super" font-size="13">clip</tspan>.</text>
+  <text x="50" y="332" class="body">Actual v̇<tspan baseline-shift="sub" font-size="13">x</tspan> can differ: fitted-model error and turning remain; the adapter has no acceleration feedback.</text>
+</svg>

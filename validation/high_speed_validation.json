@@ -1,0 +1,282 @@
+{
+  "method": "Current model, frozen parameters; recorded native steering/throttle/brake replay; each window restarts from a measured seven-state sample. Start times spaced 0.5 s apart; windows may overlap. Last partial physics interval removed.",
+  "selection": "Initial speed in [8,10) or [10,12) m/s; every measured speed including endpoint must stay in [8,12] m/s. Pooled RMSE is calculated from all endpoint errors, not the mean of per-drive RMSEs.",
+  "scope": "Three held-out fast maneuver recordings at friction 0.9, not used to fit the high-speed longitudinal corrections. Native-input replay evaluates the vehicle dynamics; logged high-level requests are absent, so this does not test request-to-pedal conversion. These are response tests, not basic-course completion results.",
+  "friction": 0.9,
+  "control_dt_s": 0.02,
+  "model_parameters_sha256": "32da66f99308f3fa30b86a592384b517c37c8aebb974fe4f6355b79b6e603720",
+  "maximum_static_inverse_error_m_s2": 2.220446049250313e-15,
+  "static_inverse_check_scope": "Algebraic fitted-map check at 131 speeds in [0,13] m/s and 71 requests in [-7,7] m/s^2; not a PyChrono response test or validation at 13 m/s.",
+  "cases": {
+    "A": {
+      "speed_range_m_s": [
+        0.1702276687425772,
+        11.992264051972887
+      ],
+      "selected_window_motion": {
+        "8_10": {
+          "maximum_abs_yaw_rate_rad_s": 0.7004828790730325,
+          "maximum_abs_wheel_steering_rad": 0.22868596376992784,
+          "maximum_abs_lateral_speed_m_s": 0.7123895636581019
+        },
+        "10_12": {
+          "maximum_abs_yaw_rate_rad_s": 0.7655734993786087,
+          "maximum_abs_wheel_steering_rad": 0.2389530752800673,
+          "maximum_abs_lateral_speed_m_s": 0.6318979370928327
+        }
+      },
+      "metrics": {
+        "8_10": {
+          "0.5_s": {
+            "windows": 5,
+            "vx_endpoint_rmse_m_s": 0.15004148246924046,
+            "vx_endpoint_bias_m_s": 0.0014522620092254357,
+            "y_ref_endpoint_rmse_m": 0.014212320609634945,
+            "heading_endpoint_rmse_rad": 0.003691841163475403,
+            "yaw_rate_endpoint_rmse_rad_s": 0.014487930347613006
+          },
+          "1_s": {
+            "windows": 5,
+            "vx_endpoint_rmse_m_s": 0.18434925249572437,
+            "vx_endpoint_bias_m_s": 0.02405593651924178,
+            "y_ref_endpoint_rmse_m": 0.03763803171112818,
+            "heading_endpoint_rmse_rad": 0.007296733001902848,
+            "yaw_rate_endpoint_rmse_rad_s": 0.013906641467901958
+          },
+          "2_s": {
+            "windows": 5,
+            "vx_endpoint_rmse_m_s": 0.15909192826287205,
+            "vx_endpoint_bias_m_s": -0.0412405788713162,
+            "y_ref_endpoint_rmse_m": 0.1276079853004625,
+            "heading_endpoint_rmse_rad": 0.010472450352947067,
+            "yaw_rate_endpoint_rmse_rad_s": 0.00894452894082655
+          }
+        },
+        "10_12": {
+          "0.5_s": {
+            "windows": 8,
+            "vx_endpoint_rmse_m_s": 0.07202572642664086,
+            "vx_endpoint_bias_m_s": -0.050590631564372934,
+            "y_ref_endpoint_rmse_m": 0.025029931037083123,
+            "heading_endpoint_rmse_rad": 0.00492726448518626,
+            "yaw_rate_endpoint_rmse_rad_s": 0.011855250290499594
+          },
+          "1_s": {
+            "windows": 7,
+            "vx_endpoint_rmse_m_s": 0.1225888568127629,
+            "vx_endpoint_bias_m_s": -0.09676711520231228,
+            "y_ref_endpoint_rmse_m": 0.046199493483300755,
+            "heading_endpoint_rmse_rad": 0.0044298867085843996,
+            "yaw_rate_endpoint_rmse_rad_s": 0.01141393812412928
+          },
+          "2_s": {
+            "windows": 5,
+            "vx_endpoint_rmse_m_s": 0.1658762166650891,
+            "vx_endpoint_bias_m_s": -0.15134202400773625,
+            "y_ref_endpoint_rmse_m": 0.09974443510065736,
+            "heading_endpoint_rmse_rad": 0.005105250699412205,
+            "yaw_rate_endpoint_rmse_rad_s": 0.013338903313560989
+          }
+        }
+      }
+    },
+    "B": {
+      "speed_range_m_s": [
+        0.1702276687425772,
+        11.617257850503226
+      ],
+      "selected_window_motion": {
+        "8_10": {
+          "maximum_abs_yaw_rate_rad_s": 0.7518674444293547,
+          "maximum_abs_wheel_steering_rad": 0.24372490379573353,
+          "maximum_abs_lateral_speed_m_s": 0.7588329028498865
+        },
+        "10_12": {
+          "maximum_abs_yaw_rate_rad_s": 0.7732026764463198,
+          "maximum_abs_wheel_steering_rad": 0.23760980982814822,
+          "maximum_abs_lateral_speed_m_s": 0.6666437100589707
+        }
+      },
+      "metrics": {
+        "8_10": {
+          "0.5_s": {
+            "windows": 8,
+            "vx_endpoint_rmse_m_s": 0.14694133548380744,
+            "vx_endpoint_bias_m_s": 0.027852739711071495,
+            "y_ref_endpoint_rmse_m": 0.01420294172904731,
+            "heading_endpoint_rmse_rad": 0.0030653092648816214,
+            "yaw_rate_endpoint_rmse_rad_s": 0.011426250009800689
+          },
+          "1_s": {
+            "windows": 8,
+            "vx_endpoint_rmse_m_s": 0.11516911816395094,
+            "vx_endpoint_bias_m_s": 0.008980881079751368,
+            "y_ref_endpoint_rmse_m": 0.03082123561106248,
+            "heading_endpoint_rmse_rad": 0.006475228807495816,
+            "yaw_rate_endpoint_rmse_rad_s": 0.010328043009564865
+          },
+          "2_s": {
+            "windows": 8,
+            "vx_endpoint_rmse_m_s": 0.1521236446327316,
+            "vx_endpoint_bias_m_s": -0.09442705195809098,
+            "y_ref_endpoint_rmse_m": 0.06891348047490019,
+            "heading_endpoint_rmse_rad": 0.00755639535445485,
+            "yaw_rate_endpoint_rmse_rad_s": 0.010937778474306372
+          }
+        },
+        "10_12": {
+          "0.5_s": {
+            "windows": 15,
+            "vx_endpoint_rmse_m_s": 0.07628151644344432,
+            "vx_endpoint_bias_m_s": -0.028302914904050288,
+            "y_ref_endpoint_rmse_m": 0.025903342757953314,
+            "heading_endpoint_rmse_rad": 0.005558995283799195,
+            "yaw_rate_endpoint_rmse_rad_s": 0.025195069736071964
+          },
+          "1_s": {
+            "windows": 14,
+            "vx_endpoint_rmse_m_s": 0.14005564867804818,
+            "vx_endpoint_bias_m_s": -0.0298905253885074,
+            "y_ref_endpoint_rmse_m": 0.06215746529549811,
+            "heading_endpoint_rmse_rad": 0.008145866170581675,
+            "yaw_rate_endpoint_rmse_rad_s": 0.02616261734942129
+          },
+          "2_s": {
+            "windows": 12,
+            "vx_endpoint_rmse_m_s": 0.12859329628419508,
+            "vx_endpoint_bias_m_s": 0.012160115739794808,
+            "y_ref_endpoint_rmse_m": 0.1320123210234868,
+            "heading_endpoint_rmse_rad": 0.01497691499830265,
+            "yaw_rate_endpoint_rmse_rad_s": 0.03060683229645675
+          }
+        }
+      }
+    },
+    "C": {
+      "speed_range_m_s": [
+        0.1702276687425772,
+        11.989955754271877
+      ],
+      "selected_window_motion": {
+        "8_10": {
+          "maximum_abs_yaw_rate_rad_s": 0.7919785462434805,
+          "maximum_abs_wheel_steering_rad": 0.2838327127526782,
+          "maximum_abs_lateral_speed_m_s": 0.8201077408266882
+        },
+        "10_12": {
+          "maximum_abs_yaw_rate_rad_s": 0.7526528394550092,
+          "maximum_abs_wheel_steering_rad": 0.29162128558800465,
+          "maximum_abs_lateral_speed_m_s": 0.5573235853745939
+        }
+      },
+      "metrics": {
+        "8_10": {
+          "0.5_s": {
+            "windows": 13,
+            "vx_endpoint_rmse_m_s": 0.07277958399971965,
+            "vx_endpoint_bias_m_s": 0.018084804675347746,
+            "y_ref_endpoint_rmse_m": 0.013613194361969304,
+            "heading_endpoint_rmse_rad": 0.0049985645681695,
+            "yaw_rate_endpoint_rmse_rad_s": 0.012727443924718675
+          },
+          "1_s": {
+            "windows": 13,
+            "vx_endpoint_rmse_m_s": 0.08179605007487858,
+            "vx_endpoint_bias_m_s": 0.015219388348290917,
+            "y_ref_endpoint_rmse_m": 0.04363882881012061,
+            "heading_endpoint_rmse_rad": 0.01231196423511802,
+            "yaw_rate_endpoint_rmse_rad_s": 0.02672026116825137
+          },
+          "2_s": {
+            "windows": 11,
+            "vx_endpoint_rmse_m_s": 0.09047071194032685,
+            "vx_endpoint_bias_m_s": -0.03452815649597534,
+            "y_ref_endpoint_rmse_m": 0.09514521468102531,
+            "heading_endpoint_rmse_rad": 0.009689514005130786,
+            "yaw_rate_endpoint_rmse_rad_s": 0.025461498299053812
+          }
+        },
+        "10_12": {
+          "0.5_s": {
+            "windows": 10,
+            "vx_endpoint_rmse_m_s": 0.1236100881417211,
+            "vx_endpoint_bias_m_s": -0.028925496031299326,
+            "y_ref_endpoint_rmse_m": 0.036142804524284054,
+            "heading_endpoint_rmse_rad": 0.011393712613182666,
+            "yaw_rate_endpoint_rmse_rad_s": 0.027957662352967587
+          },
+          "1_s": {
+            "windows": 9,
+            "vx_endpoint_rmse_m_s": 0.1643211778583334,
+            "vx_endpoint_bias_m_s": -0.010809394052547895,
+            "y_ref_endpoint_rmse_m": 0.05961260960891691,
+            "heading_endpoint_rmse_rad": 0.014701879867209468,
+            "yaw_rate_endpoint_rmse_rad_s": 0.0162900866428116
+          },
+          "2_s": {
+            "windows": 9,
+            "vx_endpoint_rmse_m_s": 0.16458864217214467,
+            "vx_endpoint_bias_m_s": 0.02161048345906617,
+            "y_ref_endpoint_rmse_m": 0.22636004440207738,
+            "heading_endpoint_rmse_rad": 0.027141323925683736,
+            "yaw_rate_endpoint_rmse_rad_s": 0.01821111990613457
+          }
+        }
+      }
+    }
+  },
+  "pooled": {
+    "8_10": {
+      "0.5_s": {
+        "windows": 26,
+        "vx_endpoint_rmse_m_s": 0.11671061564517914,
+        "vx_endpoint_bias_m_s": 0.017891757250546918,
+        "y_ref_endpoint_rmse_m": 0.013913035538386798,
+        "heading_endpoint_rmse_rad": 0.004243233725341141,
+        "yaw_rate_endpoint_rmse_rad_s": 0.012709499654585073
+      },
+      "1_s": {
+        "windows": 26,
+        "vx_endpoint_rmse_m_s": 0.11816096586534876,
+        "vx_endpoint_bias_m_s": 0.01499918383700007,
+        "y_ref_endpoint_rmse_m": 0.038947307407241116,
+        "heading_endpoint_rmse_rad": 0.009946468817991886,
+        "yaw_rate_endpoint_rmse_rad_s": 0.02066394277250326
+      },
+      "2_s": {
+        "windows": 24,
+        "vx_endpoint_rmse_m_s": 0.12937646636071487,
+        "vx_endpoint_bias_m_s": -0.05589287631154324,
+        "y_ref_endpoint_rmse_m": 0.09552274217326756,
+        "heading_endpoint_rmse_rad": 0.009214814761678614,
+        "yaw_rate_endpoint_rmse_rad_s": 0.018806326313072528
+      }
+    },
+    "10_12": {
+      "0.5_s": {
+        "windows": 33,
+        "vx_endpoint_rmse_m_s": 0.09237263587100579,
+        "vx_endpoint_bias_m_s": -0.0338946586784464,
+        "y_ref_endpoint_rmse_m": 0.029201364777734,
+        "heading_endpoint_rmse_rad": 0.007698734217198986,
+        "yaw_rate_endpoint_rmse_rad_s": 0.02365314868085282
+      },
+      "1_s": {
+        "windows": 30,
+        "vx_endpoint_rmse_m_s": 0.14408648170574212,
+        "vx_endpoint_bias_m_s": -0.03977072361094069,
+        "y_ref_endpoint_rmse_m": 0.05802684100015434,
+        "heading_endpoint_rmse_rad": 0.010019392226729387,
+        "yaw_rate_endpoint_rmse_rad_s": 0.02072277639216835
+      },
+      "2_s": {
+        "windows": 26,
+        "vx_endpoint_rmse_m_s": 0.14933367602260947,
+        "vx_endpoint_bias_m_s": -0.01601132230882877,
+        "y_ref_endpoint_rmse_m": 0.1664125577509145,
+        "heading_endpoint_rmse_rad": 0.01906656043551104,
+        "yaw_rate_endpoint_rmse_rad_s": 0.024111738204933328
+      }
+    }
+  }
+}
