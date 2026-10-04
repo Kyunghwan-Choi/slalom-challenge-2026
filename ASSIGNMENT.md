@@ -1,6 +1,6 @@
 # Slalom Challenge: assignment and evaluation
 
-Drive the supplied PyChrono car through eight alternating gates and finish as quickly as possible. Choose Easy mode (plan for a supplied tracking controller) or Full mode (vehicle controller). No path or speed is prescribed; the starter's slow path only demonstrates the interface.
+Drive the supplied PyChrono car through eight alternating gates and finish as quickly as possible. Choose Easy mode (plan for a supplied tracking controller) or Full mode (vehicle controller). No path or speed is prescribed; the **5 m/s example controller** demonstrates the interface.
 
 This **individual** 2026 *Learning-Based Control for Mobility Systems* assignment must show course-based design in your code and report. Use and explain relevant concepts such as problem formulation, DP/VI/PI, value or policy approximation, rollout, or multistep lookahead; you need not use all of them.
 
@@ -8,7 +8,7 @@ This **individual** 2026 *Learning-Based Control for Mobility Systems* assignmen
 |---|---|
 | Official course announcement | October 1, 2026, 13:00 |
 | Submission deadline | November 1, 2026, 23:59 |
-| Race results and individual questions in class | November 3, 2026; about five minutes per student |
+| Race results and individual Q&A in class | November 3, 2026; about five minutes per student |
 
 Email submissions and questions to [fairytale@kaist.ac.kr](mailto:fairytale@kaist.ac.kr). See the [submission guide](SUBMISSION_AND_AI.md) for files and report format.
 
@@ -54,19 +54,27 @@ The evaluation task is a constrained free-final-time control problem. Let $\xi$ 
 - Forward crossings on the required sides: $X_{\rm REF}(t_j)=X_j$, $\dot X_{\rm REF}(t_j)>0$, and $\sigma_j\bigl(Y_{\rm REF}(t_j)-Y_j\bigr)>0$ for $j=0,\ldots,7$.
 - Finish: $X_{\rm REF}(t_f)=X_{\rm finish}$, $\dot X_{\rm REF}(t_f)>0$, and $t_f\le60\,\mathrm{s}$.
 
-Here $(X_j,Y_j)$ is cone $j$'s center; $\sigma_j=+1$ for +Y and $-1$ for −Y. In Full mode, $u=(u_s^{\rm req},a_x^{\rm req})$ requests steering and longitudinal acceleration, with $\mathcal U=[-0.8,0.8]\times[-7,7\,\mathrm{m/s^2}]$. The adapter converts requests to vehicle inputs with speed-dependent saturation. [`course.json`](course.json), the [interface](INTERFACE.md), and local runner define exact discrete limits and event checks. PyChrono is the evaluation plant; the supplied control-oriented model is an approximation for design. Course methods may use a different training objective or problem formulation, provided the resulting solution is tested against these evaluation rules. Easy mode's finite-horizon DP is a simplified version of this task.
+Here $(X_j,Y_j)$ is cone $j$'s center; $\sigma_j=+1$ for +Y and $-1$ for −Y. In Full mode, $u=(u_s^{\rm req},a_x^{\rm req})$ requests steering and longitudinal acceleration, with $\mathcal U=[-0.8,0.8]\times[-7,7\,\mathrm{m/s^2}]$. The input adapter converts requests to vehicle inputs with speed-dependent saturation. [`course.json`](course.json), the [interface](INTERFACE.md), and runner define exact discrete limits and event checks. PyChrono is the evaluation plant; the supplied control-oriented vehicle model is an approximation for design. Course methods may use a different training objective or problem formulation, provided the resulting solution is tested against these evaluation rules. Easy mode's finite-horizon DP is a simplified version of this task.
 
 ## What is supplied and what you submit
 
-The repository provides a practice runner, course, controller contract, both mode interfaces, 5 m/s example, approximate model and validation data, and report template. [Running](RUNNING.md) explains result files and startup errors.
+The repository supplies the runner, course, both mode interfaces, **5 m/s example controller**, control-oriented vehicle model and validation data, and report template. [Running](RUNNING.md) explains execution and result files.
 
-Submit **one ZIP with a PDF report and runnable solution**: `easy_plan.json` or `controller.py`, plus helper, training, and learned-weight files needed to reproduce your method. You may submit both modes if you identify which result to evaluate. Explain your design and own validation in the report; see [submission and AI use](SUBMISSION_AND_AI.md).
+Submit **one ZIP** containing:
+
+- **Report:** `report.pdf`, explaining your design, own validation, and AI use.
+- **Runnable solution:** `easy_plan.json` for Easy, or `controller.py` for Full. If you submit both, identify which result to evaluate.
+- **Supporting files:** Required helper code and learned artifacts, plus the code and settings used to generate the plan or train the controller. Evaluation runs without retraining.
+- **Training dependencies, if used:** `requirements.txt` with pinned extra-package versions. Evaluation imports must work in the supplied Conda environment.
+
+See [Submission and AI use](SUBMISSION_AND_AI.md) for the report template and file requirements.
 
 ## Assessment
 
-- **Performance:** Successful finish time is scored against absolute-time thresholds, not class rank. Thresholds and points will be announced separately.
-- **Failure:** A failed run receives the minimum performance score.
-- **Course-based design and understanding:** Code, report, and November 3 individual discussion assess your method and explanation. Report length is not graded.
-- **Course relevance:** A generic RL library run without a course-based formulation, controller design, and validation receives zero credit.
+- **Performance:** Evaluation is primarily based on finish time. A failed run receives the minimum performance score.
+- **Course-based design and understanding:** Even a successful run may lose credit if either is insufficient, as assessed through your code, report, and **individual Q&A** on November 3.
+- **Generic RL libraries:** Using a generic RL library as the submitted solution receives **zero credit**.
+
+Absolute-time thresholds and points will be announced separately.
 
 For simulator or scoring issues, use [Troubleshooting](TROUBLESHOOTING.md); confirmed workarounds will appear there.

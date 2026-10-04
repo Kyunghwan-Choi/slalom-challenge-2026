@@ -1,6 +1,6 @@
 # Submission and AI Use
 
-Submit **one individual ZIP** by **1 November 2026, 23:59 KST** to [fairytale@kaist.ac.kr](mailto:fairytale@kaist.ac.kr). In the email, give your name, student ID, and mode (**easy** or **full**). If submitting both, identify which result to evaluate. Results and a **five-minute individual discussion** of your report and code follow in class on **3 November 2026**.
+Submit **one individual ZIP** by **November 1, 2026, 23:59 KST** to [fairytale@kaist.ac.kr](mailto:fairytale@kaist.ac.kr). In the email, give your name, student ID, and mode (**easy** or **full**). If submitting both, identify which result to evaluate. Results and a **five-minute individual Q&A** about your report and code follow in class on **November 3, 2026**.
 
 ## What to submit
 
@@ -31,11 +31,11 @@ Use the [IEEE-style two-column template](report_template.tex). **Two pages are r
 3. **Own Validation:** Your PyChrono outcome and time, meaningful baseline comparison, supporting evidence, limitations, and failures.
 4. **Conclusion:** Result and brief AI-use disclosure.
 
-Choose a course-based method and explain how your computed plan, policy, or learned parameters determine the actions used in PyChrono. A generic RL library run without course-based formulation, controller design, and validation receives **zero credit**.
+Choose a course-based method and explain how your computed plan, policy, or learned parameters determine the actions used in PyChrono. See [Assessment](ASSIGNMENT.md#assessment) for scoring rules.
 
 ## AI use
 
-AI may help write and debug code, but **you must lead the design and check its output**. In the individual questions on **November 3**, explain your method, results, and code to show that you understand the work and directed any AI use.
+AI may help write and debug code, but **you must lead the design and check its output**. In the **individual Q&A** on **November 3**, explain your method, results, and code to show that you understand the work and directed any AI use.
 
 In the report's Conclusion, name each **AI tool and model** and its main uses (such as drafting, debugging, or editing). State if you used none. No AI log or transcript is required. AI use alone does not change your score; understanding and consistency among code, report, and measured results do.
 

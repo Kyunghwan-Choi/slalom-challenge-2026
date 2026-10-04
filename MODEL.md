@@ -36,7 +36,7 @@ At the current $v_x$, a fixed **open-loop conversion** chooses throttle $u_t$ or
 
 $\hat a_x(v_{x,k},u_{t,k},u_{b,k};\mu)=\operatorname{clip}\!\left(a_{x,k}^{\rm req},a_{\min}(v_{x,k}),a_{\max}(v_{x,k})\right)$.
 
-The bounds are speed dependent and reported by [`contract.acceleration_bounds`](contract.py). The fitted inverse is algebraically one-to-one at fixed forward speed within those bounds, but **PyChrono may accelerate differently**. If the car rolls backward, the adapter instead commands braking to recover. Pedals stay fixed for 0.02 s, so even the model's $\hat a_x$ may change slightly during a step as $v_x$ changes. There is no feedback correction of acceleration in this conversion. [`dynamics.predict`](dynamics.py) includes it: model-based DP, PI, or rollout can compare requested actions without implementing a pedal map.
+The bounds are speed dependent and reported by [`contract.acceleration_bounds`](contract.py). The fitted inverse is algebraically one-to-one at fixed forward speed within those bounds, but **PyChrono may accelerate differently**. If the car rolls backward, the input adapter instead commands braking to recover. Pedals stay fixed for 0.02 s, so even the model's $\hat a_x$ may change slightly during a step as $v_x$ changes. There is no feedback correction of acceleration in this conversion. [`dynamics.predict`](dynamics.py) includes it: model-based DP, PI, or rollout can compare requested actions without implementing a pedal map.
 
 The main longitudinal, lateral, and yaw equations are:
 
@@ -56,7 +56,7 @@ Measured steering follows a fitted speed-dependent *linear* gain and first-order
 
 $\dot\delta=\frac{(s_g+s_vv_x^2)u_s-\delta}{\tau_s}$, with $(s_g,s_v,\tau_s)=(0.551426,-0.00042031,0.007088\ {\rm s})$.
 
-Below **2 m/s**, the implementation blends the lateral/yaw equations with a kinematic bicycle response. [`dynamics.py`](dynamics.py) defines capacity floors, smoothing, and midpoint integration. `dynamics.predict(state, command, previous_steering, scenario)` applies the adapter and predicts one **0.02 s** step from a `{"steering", "acceleration"}` request. Lower-level `dynamics.step` and `dynamics.replay` instead take applied `[steering, throttle, brake]` inputs for reproducible validation traces. `dynamics.parameters()` rejects friction other than **0.9** because other surfaces were not validated. Actual PyChrono acceleration may differ, especially outside measured driving conditions.
+Below **2 m/s**, the implementation blends the lateral/yaw equations with a kinematic bicycle response. [`dynamics.py`](dynamics.py) defines capacity floors, smoothing, and midpoint integration. `dynamics.predict(state, command, previous_steering, scenario)` applies the input adapter and predicts one **0.02 s** step from a `{"steering", "acceleration"}` request. Lower-level `dynamics.step` and `dynamics.replay` instead take applied `[steering, throttle, brake]` inputs for reproducible validation traces. `dynamics.parameters()` rejects friction other than **0.9** because other surfaces were not validated. Actual PyChrono acceleration may differ, especially outside measured driving conditions.
 
 ### High-speed correction
 
@@ -74,9 +74,9 @@ The main check replays **recorded Full-mode steering and $a_x^{\rm req}$ command
 
 | PyChrono drive | Speed range | Horizon | Forward-speed endpoint RMSE | REF lateral endpoint RMSE |
 |---|---:|---:|---:|---:|
-| Supplied 5 m/s slalom | 0.17–5.14 m/s | 0.5 s | 0.0873 m/s | 0.0056 m |
-| Supplied 5 m/s slalom | 0.17–5.14 m/s | 1.0 s | 0.1732 m/s | 0.0210 m |
-| Supplied 5 m/s slalom | 0.17–5.14 m/s | 2.0 s | **0.3453 m/s** | **0.0983 m** |
+| 5 m/s example controller | 0.17–5.14 m/s | 0.5 s | 0.0873 m/s | 0.0056 m |
+| 5 m/s example controller | 0.17–5.14 m/s | 1.0 s | 0.1732 m/s | 0.0210 m |
+| 5 m/s example controller | 0.17–5.14 m/s | 2.0 s | **0.3453 m/s** | **0.0983 m** |
 | Separate 8 m/s slalom | 0.17–8.09 m/s | 0.5 s | 0.0763 m/s | 0.0139 m |
 | Separate 8 m/s slalom | 0.17–8.09 m/s | 1.0 s | 0.1480 m/s | 0.0449 m |
 | Separate 8 m/s slalom | 0.17–8.09 m/s | 2.0 s | **0.2833 m/s** | **0.1596 m** |
@@ -84,9 +84,9 @@ The main check replays **recorded Full-mode steering and $a_x^{\rm req}$ command
 | High-speed straight probe | 0.17–10.74 m/s | 1.0 s | 0.1045 m/s | 0.0198 m |
 | High-speed straight probe | 0.17–10.74 m/s | 2.0 s | **0.1184 m/s** | **0.0777 m** |
 
-The 5 m/s slalom is the supplied example run. The **separate 8 m/s slalom was recorded after the model parameters were fixed** and was not used to refit them. It passed all eight gates in **20.405 s**, with **0.998 m minimum scored footprint clearance**; its [run result](validation/request_fast_slalom_result.json) records the full outcome. The straight probe was used during longitudinal calibration. These figures measure the response to controller requests; in a turn, lateral forces also affect $\dot v_x$, so $a_x^{\rm req}$ is not assumed equal to $\dot v_x$.
+The first three rows use the **5 m/s example controller**. The **separate 8 m/s slalom was recorded after the model parameters were fixed** and was not used to refit them. It passed all eight gates in **20.405 s**, with **0.998 m minimum scored footprint clearance**; its [run result](validation/request_fast_slalom_result.json) records the full outcome. The straight probe was used during longitudinal calibration. These figures measure the response to controller requests; in a turn, lateral forces also affect $\dot v_x$, so $a_x^{\rm req}$ is not assumed equal to $\dot v_x$.
 
-Reproduce the table and plot with [`validate_requests.py`](validate_requests.py), using the [5 m/s trace](validation/request_starter.npz), [8 m/s trace](validation/request_fast_slalom.npz), and [straight trace](validation/request_straight.npz). The numerical summary is in [`ax_request_metrics.json`](validation/ax_request_metrics.json). Matplotlib is needed only to regenerate the plot.
+Reproduce the table and plot with [`validate_requests.py`](validate_requests.py), using the [5 m/s example controller trace](validation/request_starter.npz), [8 m/s trace](validation/request_fast_slalom.npz), and [straight trace](validation/request_straight.npz). The numerical summary is in [`ax_request_metrics.json`](validation/ax_request_metrics.json). Matplotlib is needed only to regenerate the plot.
 
 For a separate check of the vehicle equations alone, the repository also includes [fixed-input validation metrics](validation/metrics.json), [plots](validation/model_comparison.png), and [`validate_model.py`](validate_model.py). Those tests give the model exactly the same applied steering and pedals as PyChrono, so their errors do not measure the complete Full-mode command response.
 

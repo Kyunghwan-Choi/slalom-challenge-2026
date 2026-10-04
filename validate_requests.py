@@ -22,7 +22,7 @@ CASES = {
     "high_speed_straight": "request_straight.npz",
 }
 LABELS = {
-    "starter_slalom": "5 m/s example slalom",
+    "starter_slalom": "5 m/s example controller",
     "faster_slalom": "8 m/s slalom: separate validation drive",
     "high_speed_straight": "Straight speed probe: calibration data",
 }
@@ -119,7 +119,7 @@ def plot_responses(series):
             ax = axes[row, column]
             ax.plot(time, observed[:, index], color="#172554", linewidth=2, label="PyChrono")
             ax.plot(time, predicted[:, index], color="#ea580c", linewidth=1.8,
-                    linestyle="--", label="Reduced model")
+                    linestyle="--", label="Control-oriented vehicle model")
             ax.set_title(LABELS[name])
             ax.set_xlabel("2 s window endpoint (s)")
             ax.set_ylabel(ylabel)
@@ -133,7 +133,7 @@ def plot_responses(series):
 def main():
     report = {
         "method": "2 s/1 s/0.5 s open-loop prediction windows restarted from measured states every 0.5 s; logged high-level requests replayed through dynamics.predict",
-        "scope": "Friction 0.9; 5 m/s example slalom, separate 8 m/s slalom recorded with frozen model parameters, and a calibration-related straight speed probe. Errors describe measured-state prediction windows at the listed horizons.",
+        "scope": "Friction 0.9; 5 m/s example controller, separate 8 m/s slalom recorded with frozen model parameters, and a calibration-related straight speed probe. Errors describe measured-state prediction windows at the listed horizons.",
         "cases": {},
     }
     plots = {}

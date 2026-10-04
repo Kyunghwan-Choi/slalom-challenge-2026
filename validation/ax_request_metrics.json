@@ -1,6 +1,6 @@
 {
   "method": "2 s/1 s/0.5 s open-loop prediction windows restarted from measured states every 0.5 s; logged high-level requests replayed through dynamics.predict",
-  "scope": "Friction 0.9; 5 m/s example slalom, separate 8 m/s slalom recorded with frozen model parameters, and a calibration-related straight speed probe. Errors describe measured-state prediction windows at the listed horizons.",
+  "scope": "Friction 0.9; 5 m/s example controller, separate 8 m/s slalom recorded with frozen model parameters, and a calibration-related straight speed probe. Errors describe measured-state prediction windows at the listed horizons.",
   "cases": {
     "starter_slalom": {
       "trace": "request_starter.npz",

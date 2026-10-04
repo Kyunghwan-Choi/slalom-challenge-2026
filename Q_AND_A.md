@@ -14,7 +14,7 @@ No. Its simplified grid moves assume exact tracking and omit the full vehicle fo
 
 ## Can I use a reference path or speed in my controller?
 
-Yes. Generate and track your own references. The 5 m/s example's path and speed only demonstrate the interface.
+Yes. Generate and track your own references. The **5 m/s example controller** demonstrates the interface; its path and speed are not required targets.
 
 ## May I use extra Python packages?
 

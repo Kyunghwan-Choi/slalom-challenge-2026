@@ -32,13 +32,13 @@ The [Conda lock](pychrono-win-64-explicit.txt) specifies the tested Windows x64 
 
    Expect Python `3.12.x`, `PyChrono import OK`, and `OK` from each test.
 
-5. Run the slow Full-mode example:
+5. Run the **5 m/s example controller** in Full mode:
 
    ```bat
-   conda run --no-capture-output -n slalom2026 python run_local.py --mode full --controller controller.py --output runs\example
+   conda run --no-capture-output -n slalom2026 python run_local.py --mode full --controller controller.py --output runs\example_controller
    ```
 
-   Check `runs\example\result.json`. Runs are headless by default; add `--visual` to see the car, cones, and finish line. [RUNNING.md](RUNNING.md) covers both modes and outputs.
+   Check `runs\example_controller\result.json`. Runs are headless by default; add `--visual` to see the car, cones, and finish line. [RUNNING.md](RUNNING.md) covers both modes and outputs.
 
 The same `conda run --no-capture-output -n slalom2026 python ...` prefix works in VS Code's PowerShell terminal if `conda` is available there. Otherwise, use Miniconda Prompt or its VS Code terminal profile. To use a VS Code interpreter, select `python.exe` inside `slalom2026`; an already open terminal does not switch automatically.
 

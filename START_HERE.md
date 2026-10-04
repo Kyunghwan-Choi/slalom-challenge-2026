@@ -1,11 +1,11 @@
-# From the example run to your own method
+# From the 5 m/s example controller to your own method
 
-Complete [installation](INSTALL.md), then work from the repository root in Miniconda Prompt. The supplied 5 m/s path tracking controller demonstrates the interface; develop your own course-based method.
+Complete [installation](INSTALL.md), then work from the repository root in Miniconda Prompt. The **5 m/s example controller** demonstrates the interface; develop your own course-based method.
 
 ## 1. Run and inspect
 
 ```bat
-conda run --no-capture-output -n slalom2026 python run_local.py --mode full --controller controller.py --output runs\starter
+conda run --no-capture-output -n slalom2026 python run_local.py --mode full --controller controller.py --output runs\example_controller
 ```
 
 Save this inspection snippet as `inspect_run.py` in the repository root, then run `conda run --no-capture-output -n slalom2026 python inspect_run.py`:
@@ -15,7 +15,7 @@ import json
 from pathlib import Path
 import numpy as np
 
-folder = Path("runs/starter")
+folder = Path("runs/example_controller")
 result = json.loads((folder / "result.json").read_text(encoding="utf-8"))
 with np.load(folder / "trajectory.npz") as trace:
     rows = trace["rows"]

@@ -8,14 +8,14 @@ Complete [installation](INSTALL.md) first. Run commands from the repository root
 |---|---|---|
 | **Runner** | Starts a driving episode, calls the controller every 0.02 s, advances PyChrono, checks the driving rules, and saves results | [run_local.py](run_local.py) |
 | **Plan validator** (Easy only) | Checks a submitted JSON plan's integer moves, planned gate sides, stage count, and first finish arrival before driving starts | `validate_plan` in [easy_mode.py](easy_mode.py) |
-| **Tracking controller** | Uses measured vehicle state to follow a planned path and regulate speed; supplied in Easy, or implemented inside your Full controller | [easy_mode.py](easy_mode.py); Full example in [controller.py](controller.py) |
+| **Tracking controller** | Uses measured vehicle state to follow a planned path and regulate speed; supplied in Easy, or implemented inside your Full controller | [easy_mode.py](easy_mode.py); [5 m/s example controller](controller.py) |
 | **Input adapter** | Checks command values and limits steering changes; in Full, also converts requested acceleration to throttle or brake | `apply_easy_action` / `apply_action` in [contract.py](contract.py) |
 | **Vehicle predictor** | Predicts the next state from a candidate Full-mode command for your model-based design | `predict` in [dynamics.py](dynamics.py) |
 
 | | Easy: waypoint plan | Full: vehicle control |
 |---|---|---|
 | Your task | Plan integer REF waypoint moves with virtual **0.5 s** stages; save the complete plan as `easy_plan.json` | Implement `Controller.reset` and `Controller.act`; request steering and acceleration every **0.02 s** |
-| Supplied support | Simplified grid model and fixed path tracking controller | Reduced control-oriented vehicle model and a 5 m/s example controller |
+| Supplied support | Simplified grid model and fixed path tracking controller | Control-oriented vehicle model and 5 m/s example controller |
 | Driving test | The supplied tracking controller drives your plan in PyChrono | Your controller drives PyChrono through the input adapter |
 
 ![Easy mode: offline plan, plan validation, supplied tracking controller, input adapter, PyChrono vehicle, measured-state feedback and result logging](assets/easy_system.svg)
@@ -27,10 +27,10 @@ The runner performs the feedback loop shown above. PyChrono updates the vehicle 
 ## Check the installation
 
 ```powershell
-conda run --no-capture-output -n slalom2026 python .\run_local.py --mode full --controller .\controller.py --output .\runs\starter
+conda run --no-capture-output -n slalom2026 python .\run_local.py --mode full --controller .\controller.py --output .\runs\example_controller
 ```
 
-The supplied [`controller.py`](controller.py) tracks a sample sinusoidal path at **5 m/s**. This low-speed drive checks installation and shows the controller interface; its path and speed are not assigned references or a learning-based solution. In one headless PyChrono 10.0.0 run it passed all eight gates in **30.660 s**. Check `runs/starter/result.json` for `"status": "success"`, `gates_passed: 8`, and `finish_time_s` (simulation time); small numerical differences are possible.
+The **5 m/s example controller** ([`controller.py`](controller.py)) tracks a sample sinusoidal path to check installation and demonstrate the interface. Its path and speed are not required targets; develop your own course-based method. In one headless PyChrono 10.0.0 run it passed all eight gates in **30.660 s**. Check `runs/example_controller/result.json` for `"status": "success"`, `gates_passed: 8`, and `finish_time_s` (simulation time); small numerical differences are possible.
 
 Runs are headless by default. Add `--visual` in a Windows graphical session to inspect the car and finish line; use headless runs for reported times. A completed runner call writes `result.json` and `trajectory.npz`. A malformed plan, controller import/reset error, or simulator exception can stop before either file is written; check the terminal error. See [INTERFACE.md](INTERFACE.md) for output fields.
 
@@ -124,7 +124,7 @@ The supplied predictor uses state $s=(X_{\mathrm{REF}},Y_{\mathrm{REF}},\psi,v_x
 
 $v_x,v_y$ are body-frame COM velocities; $r$ is yaw rate; $\delta$ is measured mean front-wheel steering. The action $u_k=(u_{s,k}^{\rm req},a_{x,k}^{\rm req})$ requests steering and longitudinal acceleration. The runner limits the steering command sent to PyChrono to a change of **0.04 per 0.02 s**; the predictor includes that interface rule and a fitted steering lag, so prediction needs the previously applied steering. A fixed map converts acceleration requests to throttle or brake within speed-dependent limits. Use the model for model-based planning, policy improvement, or candidate-action prediction, then test the resulting controller in PyChrono. [MODEL.md](MODEL.md) explains the equations, coordinates, evidence, and validity range; [dynamics.py](dynamics.py) and [model_parameters.json](model_parameters.json) implement the fitted predictor.
 
-Copy [`controller.py`](controller.py) and implement `Controller.reset` and `Controller.act`. Every 0.02 s, `act` receives an observation and returns steering and acceleration requests. Acceleration may be requested in $[-7,7]$ m/s², but the adapter clips it to the speed-dependent achievable range. [`dynamics.predict`](dynamics.py) includes that conversion for candidate-action evaluation. [INTERFACE.md](INTERFACE.md) defines the lifecycle, units, bounds, and scenario fields.
+Copy [`controller.py`](controller.py) and implement `Controller.reset` and `Controller.act`. Every 0.02 s, `act` receives an observation and returns steering and acceleration requests. Acceleration may be requested in $[-7,7]$ m/s², but the input adapter clips it to the speed-dependent achievable range. [`dynamics.predict`](dynamics.py) includes that conversion for candidate-action evaluation. [INTERFACE.md](INTERFACE.md) defines the lifecycle, units, bounds, and scenario fields.
 
 You may collect trajectories, improve the model, fit a value or policy approximation, or combine offline training with online improvement. You may also put a learning-based planner and your own tracking controller inside the same `Controller`; `act` must still return `{"steering", "acceleration"}`. Preserve the published evaluation interface. The base environment lacks optional Numba acceleration; measure runtime when evaluating many candidates.
 
@@ -140,7 +140,7 @@ conda run --no-capture-output -n slalom2026 python .\run_local.py --mode full --
 
 | Recorded PyChrono drive | Finish time | 1 s windows | Forward-speed RMSE | REF lateral-position RMSE |
 |---|---:|---:|---:|---:|
-| Supplied 5 m/s slalom | 30.660 s | 60 | 0.1732 m/s | 0.0210 m |
+| 5 m/s example controller | 30.660 s | 60 | 0.1732 m/s | 0.0210 m |
 | Separate 8 m/s slalom | 20.405 s | 39 | 0.1480 m/s | 0.0449 m |
 
 In the 8 m/s drive, lateral-position RMSE grows from **0.0139 m at 0.5 s** to **0.1596 m at 2 s**. These measurements support using the model for short-horizon predictions with measured-state feedback in the tested slalom conditions. Choose prediction horizon and clearance with the measured errors in mind; RMSE describes average error rather than a worst-case clearance bound. The [comparison plot](validation/ax_request_comparison.png), [metrics](validation/ax_request_metrics.json), and [MODEL.md](MODEL.md) include all horizons, speed ranges, and the additional straight-drive check.

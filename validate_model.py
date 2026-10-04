@@ -22,7 +22,7 @@ def main():
         truth = s[snapshot:snapshot+101]
         t = np.arange(len(pred)) * .02
         axs[0, col].plot(t, truth[:, 3], label='PyChrono')
-        axs[0, col].plot(t, pred[:, 3], '--', label='Provided model')
+        axs[0, col].plot(t, pred[:, 3], '--', label='Control-oriented vehicle model')
         axs[0, col].set(title=label + ' (2 s open-loop example)', xlabel='Horizon [s]', ylabel='Forward speed [m/s]')
         axs[0, col].legend()
         axs[1, col].plot(truth[:, 0], truth[:, 1])

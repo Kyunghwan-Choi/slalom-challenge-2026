@@ -1,4 +1,7 @@
-"""Untrained smoke-test baseline. Not a qualifying learning-based submission."""
+"""5 m/s example controller for checking installation and the interface.
+
+Develop your own course-based method for the submission.
+"""
 import math
 
 def clamp(x,lo,hi):return max(lo,min(hi,x))
