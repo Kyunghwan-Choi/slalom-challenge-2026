@@ -87,7 +87,7 @@ Here a<sub>D</sub> and a<sub>B</sub> are fitted propulsion and braking terms. [c
 
 Measured front-wheel steering follows a speed-dependent gain and first-order lag:
 
-δ̇ = [(s<sub>g</sub> + s<sub>v</sub> v<sub>x</sub>²) u<sub>s</sub> − δ] / τ<sub>s</sub>.
+dδ/dt = [(s<sub>g</sub> + s<sub>v</sub> v<sub>x</sub>²) u<sub>s</sub> − δ] / τ<sub>s</sub>.
 
 The fitted values are s<sub>g</sub> = 0.551426, s<sub>v</sub> = −0.00042031, and τ<sub>s</sub> = 0.007088 s. The applied dimensionless input u<sub>s</sub> and measured wheel angle δ, in radians, are different quantities.
 
@@ -134,14 +134,17 @@ Fast-slalom modeling requires **combined steering and longitudinal motion**. The
 
 Each window replays the recorded **applied steering, throttle, and brake** from a measured state. Windows start 0.5 s apart; every measured speed in a selected window lies in [8, 12] m/s. The table groups windows by their **starting speed** and pools endpoint errors across the three recordings.
 
-| Window-start speed (m/s) | Horizon (s) | Windows | Forward-speed RMSE (m/s) | REF lateral RMSE (m) |
-|---|---:|---:|---:|---:|
-| 8–10 | 0.5 | 26 | 0.1167 | 0.0139 |
-| 8–10 | 1.0 | 26 | 0.1182 | 0.0389 |
-| 8–10 | 2.0 | 24 | 0.1294 | 0.0955 |
-| 10–12 | 0.5 | 33 | 0.0924 | 0.0292 |
-| 10–12 | 1.0 | 30 | 0.1441 | 0.0580 |
-| 10–12 | 2.0 | 26 | 0.1493 | 0.1664 |
+<table>
+<thead><tr><th>Window-start speed (m/s)</th><th>Horizon (s)</th><th>Windows</th><th>Forward-speed RMSE (m/s)</th><th>REF lateral RMSE (m)</th></tr></thead>
+<tbody>
+<tr><td rowspan="3">8–10</td><td>0.5</td><td>26</td><td>0.1167</td><td>0.0139</td></tr>
+<tr><td>1.0</td><td>26</td><td>0.1182</td><td>0.0389</td></tr>
+<tr><td>2.0</td><td>24</td><td>0.1294</td><td>0.0955</td></tr>
+<tr><td rowspan="3">10–12</td><td>0.5</td><td>33</td><td>0.0924</td><td>0.0292</td></tr>
+<tr><td>1.0</td><td>30</td><td>0.1441</td><td>0.0580</td></tr>
+<tr><td>2.0</td><td>26</td><td>0.1493</td><td>0.1664</td></tr>
+</tbody>
+</table>
 
 These recordings include yaw rates up to **0.79 rad/s** and measured wheel angles up to **0.29 rad** in the selected 0.5 s windows. The [aggregate metrics](validation/high_speed_validation.json) include heading/yaw-rate errors and the window-selection rule. This checks the **vehicle dynamics with identical applied inputs**; the preceding request-replay table checks the conversion as well. The course speed limit is **12 m/s**, so the performance-relevant validation range is 8–12 m/s.
 
