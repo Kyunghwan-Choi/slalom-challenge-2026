@@ -1,0 +1,2 @@
+# Optional code-formatting and linting tool; not needed to run PyChrono.
+ruff==0.16.10

@@ -34,3 +34,4 @@ The **5 m/s example controller** checks installation and the interface; its path
 | [Submission and AI](SUBMISSION_AND_AI.md) | Files, report, AI disclosure |
 | [Troubleshooting](TROUBLESHOOTING.md) | Technical issues |
 | [Q&A](Q_AND_A.md) | Common questions |
+| [Code style](DEVELOPMENT.md) | Optional Ruff formatting and linting |

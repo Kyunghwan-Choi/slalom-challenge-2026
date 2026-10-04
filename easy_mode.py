@@ -2,12 +2,13 @@
 
 This module contains no DP solver. A student supplies a complete move list.
 """
-from pathlib import Path
+
 import bisect
 import json
 import math
-from contract import gate_side_valid
+from pathlib import Path
 
+from contract import gate_side_valid
 
 SPEC_FILE = Path(__file__).with_name("easy_spec.json")
 
@@ -38,11 +39,17 @@ def validate_plan(plan, scenario, spec=None):
     nodes = [{"X": 0.0, "Y": 0.0, "V": 0.0, "chi": 0.0}]
     finish = scenario["finish_x_m"]
     for stage, move in enumerate(moves, 1):
-        if (not isinstance(move, list) or len(move) != 2 or
-            any(isinstance(q, bool) or not isinstance(q, int) for q in move)):
+        if (
+            not isinstance(move, list)
+            or len(move) != 2
+            or any(isinstance(q, bool) or not isinstance(q, int) for q in move)
+        ):
             raise ValueError(f"Move {stage}: expected [integer m, integer n]")
         m, n = move
-        if m not in spec["longitudinal_moves"] or not spec["lateral_move_min"] <= n <= spec["lateral_move_max"]:
+        if (
+            m not in spec["longitudinal_moves"]
+            or not spec["lateral_move_min"] <= n <= spec["lateral_move_max"]
+        ):
             raise ValueError(f"Move {stage}: motion index outside the action lattice")
         nx = x_index + m
         ny = y_index + n
@@ -51,11 +58,11 @@ def validate_plan(plan, scenario, spec=None):
         x1 = nx * spec["grid_x_m"]
         for cone in scenario["cones"]:
             if x0 < cone["x"] <= x1:
-                fraction = (cone["x"]-x0)/(x1-x0)
-                gate_y = (y_index+fraction*n)*spec["grid_y_m"]
+                fraction = (cone["x"] - x0) / (x1 - x0)
+                gate_y = (y_index + fraction * n) * spec["grid_y_m"]
                 if not gate_side_valid(gate_y, cone):
                     raise ValueError(f"Move {stage}: fails planned gate {cone['x']} m")
-        nodes.append({"X": x1, "Y": ny*spec["grid_y_m"], "V": v, "chi": chi})
+        nodes.append({"X": x1, "Y": ny * spec["grid_y_m"], "V": v, "chi": chi})
         x_index, y_index = nx, ny
         if x1 >= finish and stage != len(moves):
             raise ValueError("The final move must be the first arrival at the finish")
@@ -84,20 +91,24 @@ class EasyTracker:
         pass
 
     def _interpolate(self, values, x):
-        i = max(0, min(len(self.x)-2, bisect.bisect_right(self.x, x)-1))
-        ratio = _clip((x-self.x[i])/(self.x[i+1]-self.x[i]), 0.0, 1.0)
-        return values[i] + ratio*(values[i+1]-values[i])
+        i = max(0, min(len(self.x) - 2, bisect.bisect_right(self.x, x) - 1))
+        ratio = _clip((x - self.x[i]) / (self.x[i + 1] - self.x[i]), 0.0, 1.0)
+        return values[i] + ratio * (values[i + 1] - values[i])
 
     def act(self, observation):
         x, y, psi, vx, vy, r, delta = observation["state"]
         lookahead = 3.0
-        origin_x = x - .8*math.cos(psi)
-        origin_y = y - .8*math.sin(psi)
-        dy = self._interpolate(self.y, origin_x+lookahead)-origin_y
-        local_x = math.cos(psi)*lookahead + math.sin(psi)*dy
-        local_y = -math.sin(psi)*lookahead + math.cos(psi)*dy
-        steer = _clip(.85*math.atan2(2*2.776*local_y, local_x**2+local_y**2)/.626671, -.8, .8)
-        target_v = self._interpolate(self.v, x+2.5)
-        error = target_v-vx
-        pedal = _clip(.12+.35*error, 0., .6) if error >= 0 else -_clip(-.3*error, 0., .6)
+        origin_x = x - 0.8 * math.cos(psi)
+        origin_y = y - 0.8 * math.sin(psi)
+        dy = self._interpolate(self.y, origin_x + lookahead) - origin_y
+        local_x = math.cos(psi) * lookahead + math.sin(psi) * dy
+        local_y = -math.sin(psi) * lookahead + math.cos(psi) * dy
+        steer = _clip(
+            0.85 * math.atan2(2 * 2.776 * local_y, local_x**2 + local_y**2) / 0.626671, -0.8, 0.8
+        )
+        target_v = self._interpolate(self.v, x + 2.5)
+        error = target_v - vx
+        pedal = (
+            _clip(0.12 + 0.35 * error, 0.0, 0.6) if error >= 0 else -_clip(-0.3 * error, 0.0, 0.6)
+        )
         return {"steering": steer, "longitudinal": pedal}

@@ -1,4 +1,5 @@
 """Check the public easy-mode plan contract without publishing a course solution."""
+
 import unittest
 
 from easy_mode import validate_plan
@@ -23,8 +24,7 @@ class EasyModeContractTest(unittest.TestCase):
             validate_plan({"moves": [[1, 0], [1, 0]]}, scenario)
 
     def test_planning_limits_are_advisory(self):
-        nodes = validate_plan({"moves": [[5, 4], [5, 4]]},
-                              {"finish_x_m": 10.0, "cones": []})
+        nodes = validate_plan({"moves": [[5, 4], [5, 4]]}, {"finish_x_m": 10.0, "cones": []})
         self.assertEqual(nodes[-1]["Y"], 4.0)
         self.assertGreater(nodes[-1]["Y"], 3.0)
         self.assertGreater(nodes[1]["V"] / 0.5, 4.0)
@@ -32,7 +32,7 @@ class EasyModeContractTest(unittest.TestCase):
     def test_small_correct_side_crossing_is_planning_valid(self):
         scenario = {"finish_x_m": 5.0, "cones": [{"x": 5.0, "y": 0.0, "pass_sign": 1}]}
         nodes = validate_plan({"moves": [[1, 0], [2, 0], [2, 1]]}, scenario)
-        self.assertEqual(nodes[-1]["Y"], .5)
+        self.assertEqual(nodes[-1]["Y"], 0.5)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,15 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["*.md"]
+unsafe-fixes = false
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["contract", "controller", "dynamics", "easy_mode", "run_local", "visual_course"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
