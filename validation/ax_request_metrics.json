@@ -1,6 +1,6 @@
 {
   "method": "2 s/1 s/0.5 s open-loop prediction windows restarted from measured states every 0.5 s; logged high-level requests replayed through dynamics.predict",
-  "limits": "Starter slalom and a calibration-related straight probe; neither establishes handling-limit or full-course open-loop accuracy.",
+  "scope": "Friction 0.9; 5 m/s example slalom, separate 8 m/s slalom recorded with frozen model parameters, and a calibration-related straight speed probe. Errors describe measured-state prediction windows at the listed horizons.",
   "cases": {
     "starter_slalom": {
       "trace": "request_starter.npz",
@@ -27,6 +27,34 @@
           "windows": 58,
           "vx_endpoint_rmse_m_s": 0.3453120697696682,
           "y_ref_endpoint_rmse_m": 0.09833183399964532
+        }
+      }
+    },
+    "faster_slalom": {
+      "trace": "request_fast_slalom.npz",
+      "speed_range_m_s": [
+        0.1702276687425772,
+        8.09125283753711
+      ],
+      "request_range_m_s2": [
+        -0.136879256305666,
+        3.0
+      ],
+      "metrics": {
+        "0.5_s": {
+          "windows": 40,
+          "vx_endpoint_rmse_m_s": 0.07630564329071977,
+          "y_ref_endpoint_rmse_m": 0.01386546374665192
+        },
+        "1_s": {
+          "windows": 39,
+          "vx_endpoint_rmse_m_s": 0.14804009257761816,
+          "y_ref_endpoint_rmse_m": 0.04493455547921559
+        },
+        "2_s": {
+          "windows": 37,
+          "vx_endpoint_rmse_m_s": 0.2833015920034112,
+          "y_ref_endpoint_rmse_m": 0.15960459777750635
         }
       }
     },

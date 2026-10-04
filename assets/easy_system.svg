@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img">
+<title>Easy mode: plan first, then drive with feedback</title><desc>The student creates a waypoint plan offline. The runner validates it and closes the feedback loop through the supplied tracking controller, Easy input adapter, and PyChrono vehicle.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker></defs>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#172033}.title{font-size:28px;font-weight:700}.heading{font-size:23px;font-weight:700}.body{font-size:20px}.small{font-size:18px}.line{fill:none;stroke:#334155;stroke-width:2.5;marker-end:url(#arrow)}</style>
+<rect width="1200" height="650" fill="#fff"/>
+<text x="35" y="38" class="title">Easy mode: plan first, then drive with feedback</text>
+<rect x="50" y="75" width="435" height="110" rx="12" fill="#eaf1fc" stroke="#64748b" stroke-width="1.5"/>
+<text x="267.5" y="107" class="heading" text-anchor="middle">Student planning</text>
+<text x="267.5" y="137" class="body" text-anchor="middle">DP or another course-based method</text>
+<text x="267.5" y="162" class="body" text-anchor="middle">Virtual position steps: 0.5 s</text>
+<rect x="620" y="75" width="350" height="110" rx="12" fill="#eaf1fc" stroke="#64748b" stroke-width="1.5"/>
+<text x="795.0" y="107" class="heading" text-anchor="middle">easy_plan.json</text>
+<text x="795.0" y="137" class="body" text-anchor="middle">Complete integer move list</text>
+<text x="795.0" y="162" class="body" text-anchor="middle">Waypoints and segment speeds</text>
+<path d="M 485 130 H 620" class="line"/>
+<rect x="20" y="220" width="1160" height="410" rx="16" fill="#f8fafc" stroke="#64748b" stroke-width="2" stroke-dasharray="8 5"/>
+<text x="42" y="252" class="heading" text-anchor="start">Runner: run_local.py</text>
+<path d="M 795 185 V 282 H 172 V 325" class="line"/>
+<text x="655" y="272" class="small" text-anchor="start">Load once before driving</text>
+<rect x="50" y="325" width="245" height="125" rx="12" fill="#e9f4ee" stroke="#64748b" stroke-width="1.5"/>
+<text x="172.5" y="357" class="heading" text-anchor="middle">Plan validator</text>
+<text x="172.5" y="387" class="body" text-anchor="middle">Grid, gate sides, horizon</text>
+<text x="172.5" y="412" class="body" text-anchor="middle">First finish arrival</text>
+<text x="172.5" y="437" class="body" text-anchor="middle">Before vehicle simulation</text>
+<rect x="335" y="325" width="245" height="125" rx="12" fill="#e9f4ee" stroke="#64748b" stroke-width="1.5"/>
+<text x="457.5" y="357" class="heading" text-anchor="middle">Tracking controller</text>
+<text x="457.5" y="387" class="body" text-anchor="middle">Supplied feedback law</text>
+<text x="457.5" y="412" class="body" text-anchor="middle">Path and speed tracking</text>
+<text x="457.5" y="437" class="body" text-anchor="middle">Runs every 0.02 s</text>
+<rect x="620" y="325" width="245" height="125" rx="12" fill="#e9f4ee" stroke="#64748b" stroke-width="1.5"/>
+<text x="742.5" y="357" class="heading" text-anchor="middle">Easy input adapter</text>
+<text x="742.5" y="387" class="body" text-anchor="middle">Steering and pedal limits</text>
+<text x="742.5" y="412" class="body" text-anchor="middle">Native inputs:</text>
+<text x="742.5" y="437" class="body" text-anchor="middle">steering, throttle, brake</text>
+<rect x="905" y="325" width="245" height="125" rx="12" fill="#fff1da" stroke="#64748b" stroke-width="1.5"/>
+<text x="1027.5" y="357" class="heading" text-anchor="middle">PyChrono vehicle</text>
+<text x="1027.5" y="387" class="body" text-anchor="middle">BMW E90 + TMeasy</text>
+<text x="1027.5" y="412" class="body" text-anchor="middle">Physics step: 0.001 s</text>
+<text x="1027.5" y="437" class="body" text-anchor="middle">Actual vehicle motion</text>
+<path d="M 295 388 H 335" class="line"/>
+<path d="M 580 388 H 620" class="line"/>
+<path d="M 865 388 H 905" class="line"/>
+<path d="M 1027 450 V 515 H 457 V 450" class="line"/>
+<text x="748" y="503" class="body" text-anchor="middle">Measured vehicle state every 0.02 s</text>
+<rect x="700" y="554" width="450" height="56" rx="12" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+<text x="925.0" y="586" class="heading" text-anchor="middle">Driving-rule checks + saved results</text>
+<path d="M 1150 388 H 1166 V 582 H 1150" class="line"/>
+<text x="52" y="589" class="small" text-anchor="start">Student plan</text>
+<text x="52" y="613" class="small" text-anchor="start">Supplied execution and physical evaluation</text>
+</svg>

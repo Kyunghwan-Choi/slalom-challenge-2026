@@ -6,12 +6,12 @@ Choose one mode; both use the same course and success rules.
 
 | Mode | Your task | Supplied support |
 |---|---|---|
-| **Easy** | Plan a grid-based waypoint path with virtual 0.5 s steps; submit `easy_plan.json` | Simplified planning model and fixed path-tracking controller |
+| **Easy** | Plan a grid-based waypoint path with virtual 0.5 s steps; submit `easy_plan.json` | Simplified planning model and fixed path tracking controller |
 | **Full** | Write a `Controller` that requests steering and acceleration every 0.02 s | Reduced vehicle dynamics model and a 5 m/s example controller |
 
-In Easy mode, the supplied path tracker drives the car every 0.02 s along your plan; actual waypoint arrival times may differ from the virtual steps. In Full mode, your controller chooses steering and acceleration every 0.02 s; it may combine a learned planner with your own tracker.
+In Easy mode, the supplied path tracking controller drives the car every 0.02 s along your plan; actual waypoint arrival times may differ from the virtual steps. In Full mode, your controller chooses steering and acceleration every 0.02 s; it may combine a learned planner with your own tracking controller.
 
-The supplied 5 m/s path-tracking example checks installation and the interface. Its path and speed are examples, not required targets. Course configuration, runner, model validation data, and interface checks are included. Click the image to watch the drive.
+The supplied 5 m/s path tracking example checks installation and the interface. Its path and speed are examples, not required targets. Course configuration, the local simulation program (`run_local.py`), model validation data, and interface checks are included. [Running](RUNNING.md#how-the-system-works) shows both control-system diagrams. Click the image to watch the drive.
 
 [![Watch the supplied 5 m/s PyChrono example drive](assets/starter_drive_poster.png)](assets/starter_drive.mp4)
 

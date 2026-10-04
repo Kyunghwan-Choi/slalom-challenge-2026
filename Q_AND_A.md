@@ -6,7 +6,7 @@ No. Submit an Easy plan, a Full controller, or both; if both, identify the resul
 
 ## Can I use a lower-level controller in Full mode and apply learning at a higher level?
 
-Yes. A learned planner may choose targets for your path or speed tracker. Include both in your submitted `Controller`. Every 0.02 s, `Controller.act` must request steering and longitudinal acceleration; the runner converts acceleration to throttle or brake. Explain each component's role in your report.
+Yes. A learned planner may choose targets for your path or speed tracking controller. Include both in your submitted `Controller`. Every 0.02 s, `Controller.act` must request steering and longitudinal acceleration; the runner converts acceleration to throttle or brake. Explain each component's role in your report.
 
 ## Is the Easy-mode DP plan guaranteed to finish safely in PyChrono?
 

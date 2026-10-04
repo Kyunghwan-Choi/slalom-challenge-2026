@@ -2,6 +2,8 @@
 
 The evaluator uses PyChrono 10.0.0's BMW E90 with TMeasy tires on level rigid terrain. PyChrono drives the car through steering, throttle, and brake inputs. Full mode asks you for **steering and longitudinal-acceleration requests** instead; a supplied fixed conversion sends throttle or brake to PyChrono. This simplifies controller design. [`dynamics.py`](dynamics.py) predicts the response with a reduced planar bicycle model fitted at road friction $\mu=0.9$. It does not reproduce every PyChrono state or guarantee behavior at untested limits. See [Project Chrono's vehicle manual](https://api.projectchrono.org/manual_vehicle.html) for the underlying framework.
 
+The **runner**, [run_local.py](run_local.py), executes the measured-state feedback loop. The **input adapter** in [contract.py](contract.py) converts controller requests to native vehicle inputs; `dynamics.predict` uses the same conversion when evaluating candidate commands. [Running](RUNNING.md#how-the-system-works) shows the complete system diagrams.
+
 ![REF, COM, vehicle heading, and the scored car footprint](assets/ref_com.svg)
 
 Global axes are capital $X,Y$; rotating body axes are lowercase $x,y$.
@@ -66,21 +68,28 @@ The correction does not guarantee requested acceleration. In a PyChrono straight
 
 ## Comparison with PyChrono
 
-![Forward-speed response to logged Full-mode steering and acceleration requests](validation/ax_request_comparison.png)
+![Forward-speed and lateral-position responses to recorded Full-mode commands in two slaloms and a straight drive](validation/ax_request_comparison.png)
 
-The main check replays **logged Full-mode steering and $a_x^{\rm req}$ commands** through [`dynamics.predict`](dynamics.py), including its steering limit and pedal conversion. Every prediction window starts from a measured PyChrono state and runs open loop for 0.5, 1, or 2 s. Windows start 0.5 s apart and can overlap. The plot shows the 2 s forward-speed endpoints.
+The main check replays **recorded Full-mode steering and $a_x^{\rm req}$ commands** through [`dynamics.predict`](dynamics.py), including its steering limit and pedal conversion. Every prediction window starts from a measured PyChrono state and runs open loop for 0.5, 1, or 2 s. Windows start 0.5 s apart and can overlap. The plot shows forward-speed and lateral-position endpoints after 2 s.
 
 | PyChrono drive | Speed range | Horizon | Forward-speed endpoint RMSE | REF lateral endpoint RMSE |
 |---|---:|---:|---:|---:|
 | Supplied 5 m/s slalom | 0.17–5.14 m/s | 0.5 s | 0.0873 m/s | 0.0056 m |
 | Supplied 5 m/s slalom | 0.17–5.14 m/s | 1.0 s | 0.1732 m/s | 0.0210 m |
 | Supplied 5 m/s slalom | 0.17–5.14 m/s | 2.0 s | **0.3453 m/s** | **0.0983 m** |
+| Separate 8 m/s slalom | 0.17–8.09 m/s | 0.5 s | 0.0763 m/s | 0.0139 m |
+| Separate 8 m/s slalom | 0.17–8.09 m/s | 1.0 s | 0.1480 m/s | 0.0449 m |
+| Separate 8 m/s slalom | 0.17–8.09 m/s | 2.0 s | **0.2833 m/s** | **0.1596 m** |
 | High-speed straight probe | 0.17–10.74 m/s | 0.5 s | 0.0947 m/s | 0.0053 m |
 | High-speed straight probe | 0.17–10.74 m/s | 1.0 s | 0.1045 m/s | 0.0198 m |
 | High-speed straight probe | 0.17–10.74 m/s | 2.0 s | **0.1184 m/s** | **0.0777 m** |
 
-The slalom is the supplied example controller's run; the straight probe is related to longitudinal calibration and is **not an independent fast-slalom test**. These figures compare the **response to requested actions** rather than assuming $a_x^{\rm req}=\dot v_x$; in a turn, lateral forces also affect $\dot v_x$. The 2 s starter-speed bias is material for tight cone clearance. Reproduce the table and plot using [`validate_requests.py`](validate_requests.py), the [slalom trace](validation/request_starter.npz), and the [straight trace](validation/request_straight.npz); the numerical summary is in [`ax_request_metrics.json`](validation/ax_request_metrics.json). Matplotlib is needed only to regenerate the plot.
+The 5 m/s slalom is the supplied example run. The **separate 8 m/s slalom was recorded after the model parameters were fixed** and was not used to refit them. It passed all eight gates in **20.405 s**, with **0.998 m minimum scored footprint clearance**; its [run result](validation/request_fast_slalom_result.json) records the full outcome. The straight probe was used during longitudinal calibration. These figures measure the response to controller requests; in a turn, lateral forces also affect $\dot v_x$, so $a_x^{\rm req}$ is not assumed equal to $\dot v_x$.
+
+Reproduce the table and plot with [`validate_requests.py`](validate_requests.py), using the [5 m/s trace](validation/request_starter.npz), [8 m/s trace](validation/request_fast_slalom.npz), and [straight trace](validation/request_straight.npz). The numerical summary is in [`ax_request_metrics.json`](validation/ax_request_metrics.json). Matplotlib is needed only to regenerate the plot.
 
 For a separate check of the vehicle equations alone, the repository also includes [fixed-input validation metrics](validation/metrics.json), [plots](validation/model_comparison.png), and [`validate_model.py`](validate_model.py). Those tests give the model exactly the same applied steering and pedals as PyChrono, so their errors do not measure the complete Full-mode command response.
 
-These are **short-window** tests. Full-course open-loop error accumulates; accuracy for fast slaloms, large sideslip, wheel spin or lock, other friction, and extreme student policies is unverified. The model omits PyChrono's full roll/pitch, gear, engine, wheel, and tire states. Validate the final controller in PyChrono.
+These tests support the model's use for **short-horizon prediction with measured-state feedback** on the level, friction-0.9 slalom course. In the 8 m/s drive, lateral RMSE increases from 0.0139 m at 0.5 s to 0.1596 m at 2 s; that horizon dependence matters when comparing candidate paths near cones. RMSE is an average error measure, not a worst-case safety bound. The reduced state omits roll/pitch, gear, engine, wheel, and tire internal states, so prediction errors depend on the driving conditions.
+
+For your own basic-course Full run, execute `python validate_requests.py --run runs/your_run` in the supplied environment. It writes `model_check.json` with the same horizon-dependent errors. Compare those errors, actual clearance, and the complete driving outcome when choosing model horizon and control settings.

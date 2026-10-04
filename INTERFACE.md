@@ -2,6 +2,8 @@
 
 Both modes use the same PyChrono course. Choose `--mode easy|full`: Easy reads `--plan`; Full loads `--controller`. See [RUNNING.md](RUNNING.md) for the learning tasks. Physical quantities use SI units; steering requests and native PyChrono driver inputs are dimensionless.
 
+The **runner**, [run_local.py](run_local.py), executes each episode, sends observations to the controller, advances the vehicle, checks driving rules, and saves results. Its **input adapter**, [contract.py](contract.py), checks commands and converts them to native vehicle inputs. The [system diagrams](RUNNING.md#how-the-system-works) show this feedback loop and the separate Easy plan-validation step.
+
 ## Easy plan
 
 Submit a UTF-8 JSON object with exactly one key, `moves`, containing a nonempty list of integer `[m,n]` pairs. The **last move must be the first** to reach `finish_x_m`. The [complete successful plan](examples/easy_success_73.json) and [complete physical-failure plan](examples/easy_failure_73.json) show the exact format; both pass the virtual plan checks. [`easy_spec.json`](easy_spec.json) defines the fixed grid and suggested DP bounds. [`easy_mode.py`](easy_mode.py) checks the lattice, horizon, gate sides, and finish, then converts accepted nodes to steering and pedal commands. The suggested speed, turn, and road-strip bounds may be adjusted in a student's DP and are not plan-validation rules. PyChrono applies the fixed physical safety rules. Easy submissions do not implement `Controller.act` or use Full mode's acceleration request.

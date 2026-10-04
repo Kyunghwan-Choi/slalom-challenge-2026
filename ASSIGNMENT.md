@@ -1,6 +1,6 @@
 # Slalom Challenge: assignment and evaluation
 
-Drive the supplied PyChrono car through eight alternating gates and finish as quickly as possible. Choose Easy mode (plan for a supplied tracker) or Full mode (vehicle controller). No path or speed is prescribed; the starter's slow path only demonstrates the interface.
+Drive the supplied PyChrono car through eight alternating gates and finish as quickly as possible. Choose Easy mode (plan for a supplied tracking controller) or Full mode (vehicle controller). No path or speed is prescribed; the starter's slow path only demonstrates the interface.
 
 This **individual** 2026 *Learning-Based Control for Mobility Systems* assignment must show course-based design in your code and report. Use and explain relevant concepts such as problem formulation, DP/VI/PI, value or policy approximation, rollout, or multistep lookahead; you need not use all of them.
 
@@ -29,7 +29,7 @@ In the fixed **global $(X,Y)$ frame**, +X points to the finish and +Y points lef
 | Finish and limit | $X_{\rm REF}=145$ m, 20 m after the last cone; 60 s simulation time |
 | Intervals | Controller: 0.02 s; physics: 0.001 s |
 
-Both modes use **the same plant and success rules**. Easy submits a waypoint plan at virtual 0.5 s stages; the supplied path-tracking controller drives the car and derives segment speed from the waypoints. Its restricted planning model is a first DP exercise. Full submits a controller that observes the car and requests steering and longitudinal acceleration every 0.02 s. The runner converts acceleration to throttle or brake. You may build a lower-level tracker under a learned planner in Full mode, but `Controller.act` must return the published action. See [running and learning modes](RUNNING.md) and [questions and answers](Q_AND_A.md).
+Both modes use **the same plant and success rules**. Easy submits a waypoint plan at virtual 0.5 s stages; the supplied path tracking controller drives the car and derives segment speed from the waypoints. Its restricted planning model is a first DP exercise. Full submits a controller that observes the car and requests steering and longitudinal acceleration every 0.02 s. The runner converts acceleration to throttle or brake. You may build a lower-level tracking controller under a learned planner in Full mode, but `Controller.act` must return the published action. See [running and learning modes](RUNNING.md) and [questions and answers](Q_AND_A.md).
 
 ### Gate and safety rules
 

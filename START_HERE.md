@@ -1,6 +1,6 @@
 # From the example run to your own method
 
-Complete [installation](INSTALL.md), then work from the repository root in Miniconda Prompt. The supplied controller is a slow interface check, not a learning-based solution.
+Complete [installation](INSTALL.md), then work from the repository root in Miniconda Prompt. The supplied 5 m/s path tracking controller demonstrates the interface; develop your own course-based method.
 
 ## 1. Run and inspect
 
@@ -47,7 +47,7 @@ next_state, applied_inputs = predict(
 )
 ```
 
-`next_state` has seven entries; `applied_inputs` is `[steering, throttle, brake]`. The predictor includes the public steering rate limit and acceleration-to-pedal adapter. A zero acceleration request can still apply throttle to offset modeled resistance. The predictor approximates PyChrono, so compare predictions with recorded outcomes. See [Interface](INTERFACE.md) and [Model](MODEL.md) for units, bounds, and limits.
+`next_state` has seven entries; `applied_inputs` is `[steering, throttle, brake]`. The predictor includes the **input adapter**: the supplied command conversion that limits steering changes and maps acceleration to pedals. A zero acceleration request can still apply throttle to offset modeled resistance. The predictor approximates PyChrono, so compare predictions with recorded outcomes. See [Interface](INTERFACE.md) and [Model](MODEL.md) for units, bounds, and limits.
 
 ## 3. Connect your learned artifact
 
@@ -70,3 +70,5 @@ class Controller:
 ```
 
 Test the finished controller with `conda run --no-capture-output -n slalom2026 python run_local.py --mode full --controller your_controller.py --output runs/your_run`. Submit the artifact and code needed to reproduce it; evaluation loads your files without retraining or installing extra packages. Easy mode uses a complete `easy_plan.json` instead; see [Running](RUNNING.md) and [Submission](SUBMISSION_AND_AI.md).
+
+For a basic-course Full-mode run, `conda run --no-capture-output -n slalom2026 python validate_requests.py --run runs/your_run` writes `model_check.json` beside the driving results. It compares the supplied model with your recorded commands at available 0.5, 1, and 2 s prediction horizons; at least 0.5 s of complete control steps is required.

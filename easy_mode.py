@@ -1,4 +1,4 @@
-"""Public easy-mode plan validator and fixed PyChrono action tracker.
+"""Public easy-mode plan validator and fixed PyChrono tracking controller.
 
 This module contains no DP solver. A student supplies a complete move list.
 """

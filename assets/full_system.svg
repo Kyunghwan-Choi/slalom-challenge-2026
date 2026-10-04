@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img">
+<title>Full mode: your controller closes the feedback loop</title><desc>The student develops a controller and optional learned files offline. During each episode, the runner calls Controller.act, converts steering and acceleration through the Full input adapter, and measures the PyChrono response. The vehicle predictor can be used in design or inside the controller.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker></defs>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#172033}.title{font-size:28px;font-weight:700}.heading{font-size:23px;font-weight:700}.body{font-size:20px}.small{font-size:18px}.line{fill:none;stroke:#334155;stroke-width:2.5;marker-end:url(#arrow)}</style>
+<rect width="1200" height="700" fill="#fff"/>
+<text x="35" y="38" class="title">Full mode: your controller closes the feedback loop</text>
+<rect x="50" y="75" width="435" height="110" rx="12" fill="#eaf1fc" stroke="#64748b" stroke-width="1.5"/>
+<text x="267.5" y="107" class="heading" text-anchor="middle">Student design and learning</text>
+<text x="267.5" y="137" class="body" text-anchor="middle">Use the model and your run data</text>
+<text x="267.5" y="162" class="body" text-anchor="middle">Train or optimize offline</text>
+<rect x="620" y="75" width="520" height="110" rx="12" fill="#eaf1fc" stroke="#64748b" stroke-width="1.5"/>
+<text x="880.0" y="107" class="heading" text-anchor="middle">Your controller code + optional learned files</text>
+<text x="880.0" y="137" class="body" text-anchor="middle">Controller.reset loads the episode setup</text>
+<text x="880.0" y="162" class="body" text-anchor="middle">and any saved learning artifacts</text>
+<path d="M 485 130 H 620" class="line"/>
+<rect x="20" y="220" width="1160" height="460" rx="16" fill="#f8fafc" stroke="#64748b" stroke-width="2" stroke-dasharray="8 5"/>
+<text x="42" y="252" class="heading" text-anchor="start">Runner: run_local.py</text>
+<path d="M 880 185 V 282 H 210 V 325" class="line"/>
+<text x="692" y="272" class="small" text-anchor="start">Initialize once per episode</text>
+<rect x="50" y="325" width="320" height="125" rx="12" fill="#eaf1fc" stroke="#64748b" stroke-width="1.5"/>
+<text x="210.0" y="357" class="heading" text-anchor="middle">Your Controller.act</text>
+<text x="210.0" y="387" class="body" text-anchor="middle">Observation in, command out</text>
+<text x="210.0" y="412" class="body" text-anchor="middle">Steering + acceleration request</text>
+<text x="210.0" y="437" class="body" text-anchor="middle">Runs every 0.02 s</text>
+<rect x="435" y="325" width="320" height="125" rx="12" fill="#e9f4ee" stroke="#64748b" stroke-width="1.5"/>
+<text x="595.0" y="357" class="heading" text-anchor="middle">Full input adapter</text>
+<text x="595.0" y="387" class="body" text-anchor="middle">Limits steering changes</text>
+<text x="595.0" y="412" class="body" text-anchor="middle">Acceleration request to pedals</text>
+<text x="595.0" y="437" class="body" text-anchor="middle">steering, throttle, brake</text>
+<rect x="820" y="325" width="320" height="125" rx="12" fill="#fff1da" stroke="#64748b" stroke-width="1.5"/>
+<text x="980.0" y="357" class="heading" text-anchor="middle">PyChrono vehicle</text>
+<text x="980.0" y="387" class="body" text-anchor="middle">BMW E90 + TMeasy</text>
+<text x="980.0" y="412" class="body" text-anchor="middle">Physics step: 0.001 s</text>
+<text x="980.0" y="437" class="body" text-anchor="middle">Actual vehicle motion</text>
+<path d="M 370 388 H 435" class="line"/>
+<path d="M 755 388 H 820" class="line"/>
+<path d="M 980 450 V 515 H 210 V 450" class="line"/>
+<text x="601" y="503" class="body" text-anchor="middle">Observation + previous applied inputs every 0.02 s</text>
+<rect x="50" y="555" width="465" height="105" rx="12" fill="#f0eefe" stroke="#64748b" stroke-width="1.5"/>
+<text x="282.5" y="587" class="heading" text-anchor="middle">Vehicle predictor: dynamics.predict</text>
+<text x="282.5" y="617" class="body" text-anchor="middle">Candidate commands to predicted states</text>
+<text x="282.5" y="642" class="body" text-anchor="middle">Optional in offline design or Controller.act</text>
+<path d="M 50 388 H 34 V 607 H 50" class="line" stroke-dasharray="6 5"/>
+<rect x="620" y="569" width="520" height="72" rx="12" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+<text x="880.0" y="601" class="heading" text-anchor="middle">Driving-rule checks + saved results</text>
+<text x="880.0" y="631" class="body" text-anchor="middle">result.json and trajectory.npz</text>
+<path d="M 1140 388 H 1165 V 605 H 1140" class="line"/>
+</svg>
