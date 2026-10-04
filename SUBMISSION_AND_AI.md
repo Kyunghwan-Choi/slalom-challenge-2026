@@ -20,7 +20,7 @@ submission/
 - **Packages:** Extra packages may be used for training; list pinned versions in `requirements.txt`. **Evaluation-time imports must work in the supplied Conda environment**. Scoring will not install packages from `requirements.txt`.
 - **Omit:** Conda environments, PyChrono installations, and large raw training datasets. Give the data source or generation procedure instead.
 
-Easy runs from `easy_plan.json`; Full runs from `Controller.reset/act` in `controller.py`. See [Running](RUNNING.md) and the [interface](INTERFACE.md) for contracts and commands.
+Easy runs from `easy_plan.json`; Full runs from `Controller.reset/act` in `controller.py`. Submit your solution files, not replacements for the [fixed evaluation components](RUNNING.md#what-you-may-change). See the [interface](INTERFACE.md) for contracts and commands.
 
 ## Report
 

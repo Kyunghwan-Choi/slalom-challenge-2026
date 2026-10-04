@@ -12,6 +12,8 @@ Global axes are capital X, Y; rotating body axes are lowercase x, y.
 
 The seven-state vector is s = (X<sub>REF</sub>, Y<sub>REF</sub>, ψ, v<sub>x</sub>, v<sub>y</sub>, r, δ).
 
+Full-mode prediction also needs previous applied steering for the input adapter; see the [augmented model state](RUNNING.md#full-vehicle-controller).
+
 ![COM velocities, yaw rate, and front-wheel steering; position and heading are defined in the preceding figure](assets/state_variables.svg)
 
 Global +X follows the course and +Y points left. Body +x points forward and +y left. Positions p<sub>REF</sub> = (X<sub>REF</sub>, Y<sub>REF</sub>) and p<sub>COM</sub> = (X<sub>COM</sub>, Y<sub>COM</sub>) use **global** coordinates. Heading ψ is counterclockwise from global +X to body +x; v<sub>x</sub>, v<sub>y</sub> are body-frame COM velocities, r is yaw rate, and δ is measured mean front-wheel steering.

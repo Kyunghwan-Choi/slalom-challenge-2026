@@ -31,23 +31,17 @@ if len(rows):
 
 For row `k`, the state **before** `requested_actions[k]` is `initial_state` when $k=0$, or `rows[k-1, :7]` otherwise. `rows[k, :7]` is the state afterward; `rows[k, 10]` is elapsed simulation time. A terminal event can interrupt a 0.02 s step. Use `result.json` for finish and gate times. If the run stops before creating output files, inspect the terminal error.
 
-## 2. Try one model prediction
+## 2. Predict and compare
 
-In a Full-mode `Controller.act`, compare any valid candidate action with the supplied one-step predictor:
+After the run above, execute [try_predict.py](try_predict.py) to predict one recorded action and print the predicted state, measured state, and their difference. Row 500 starts at 10 s:
 
-```python
-from dynamics import predict
-
-candidate = {"steering": 0.0, "acceleration": 0.0}  # interface example
-next_state, applied_inputs = predict(
-    observation["state"],
-    candidate,
-    observation["previous_applied"]["steering"],
-    self.scenario,
-)
+```bat
+conda run --no-capture-output -n slalom2026 python try_predict.py --run runs\example_controller --row 500
 ```
 
-`next_state` has seven entries; `applied_inputs` is `[steering, throttle, brake]`. The predictor includes the **input adapter**: the supplied command conversion that limits steering changes and maps acceleration to pedals. A zero acceleration request can still apply throttle to offset modeled resistance. The predictor approximates PyChrono, so compare predictions with recorded outcomes. See [Interface](INTERFACE.md) and [Model](MODEL.md) for units, bounds, and limits.
+Add `--steps 25` to replay the next 0.5 s of recorded commands from the same initial measurement. The script carries the predicted state and previous applied steering forward; it does not reset to measured states between steps. This demonstrates model use, not action optimization. In your controller, choose candidate actions with your own method; [Interface](INTERFACE.md#action-and-input-adapter) shows the `predict` call.
+
+`predict` returns seven state entries and `[steering, throttle, brake]`. It includes the input adapter; a zero acceleration request may still apply throttle to offset modeled resistance. The script uses the supplied basic course and rejects partial terminal steps. [Model](MODEL.md) explains prediction errors; [failure diagnosis](INTERFACE.md#diagnose-a-failed-drive) explains driving outcomes.
 
 ## 3. Connect your learned artifact
 

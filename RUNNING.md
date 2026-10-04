@@ -24,6 +24,16 @@ Complete [installation](INSTALL.md) first. Run commands from the repository root
 
 The runner performs the feedback loop shown above. PyChrono updates the vehicle every **0.001 s**; a controller receives a new observation every **0.02 s**. Easy's **0.5 s** interval belongs to the virtual plan, so actual waypoint arrival times can differ. The runner checks actual collision, road, speed, heading, gate, and finish conditions during the physics steps.
 
+## What you may change
+
+| Your files | Fixed during evaluation |
+|---|---|
+| Easy plan, plan-generation code, and adjustable DP bounds | Published grid, action set, horizon, and supplied Easy tracking controller |
+| Full controller, training code, helper modules, and learned artifacts | Observation/action contract, input adapter, and PyChrono runner |
+| Your own predictor and fitted coefficients, in separate files | Supplied `dynamics.py`, `model_parameters.json`, course, and Conda environment |
+
+Submit your plan or controller and its supporting files; use distinct names for custom helper modules and parameter files. Evaluation uses the supplied course and execution code. Local `--config` experiments do not change those rules. Record the repository commit used for your reported results.
+
 ## Check the installation
 
 ```powershell
@@ -123,6 +133,8 @@ The second command intentionally returns a nonzero exit code after writing `resu
 The supplied predictor uses state $s=(X_{\mathrm{REF}},Y_{\mathrm{REF}},\psi,v_x,v_y,r,\delta)$ and transition $\hat s_{k+1}=F_{\mathrm{red}}(s_k,u_k,u_{s,k-1}^{\mathrm{applied}};\Delta t=0.02\,\mathrm{s},\mu=0.9)$.
 
 $v_x,v_y$ are body-frame COM velocities; $r$ is yaw rate; $\delta$ is measured mean front-wheel steering. The action $u_k=(u_{s,k}^{\rm req},a_{x,k}^{\rm req})$ requests steering and longitudinal acceleration. The runner limits the steering command sent to PyChrono to a change of **0.04 per 0.02 s**; the predictor includes that interface rule and a fitted steering lag, so prediction needs the previously applied steering. A fixed map converts acceleration requests to throttle or brake within speed-dependent limits. Use the model for model-based planning, policy improvement, or candidate-action prediction, then test the resulting controller in PyChrono. [MODEL.md](MODEL.md) explains the equations, coordinates, evidence, and validity range; [dynamics.py](dynamics.py) and [model_parameters.json](model_parameters.json) implement the fitted predictor.
+
+For value or policy learning with this transition, include the input-adapter memory in the model state: $\tilde s_k=(s_k,u_{s,k-1}^{\mathrm{applied}})$. It is available in `observation["previous_applied"]["steering"]`; measured wheel angle $\delta$ cannot replace it. State any additional history or context used by your method in the report.
 
 Copy [`controller.py`](controller.py) and implement `Controller.reset` and `Controller.act`. Every 0.02 s, `act` receives an observation and returns steering and acceleration requests. Acceleration may be requested in $[-7,7]$ m/s², but the input adapter clips it to the speed-dependent achievable range. [`dynamics.predict`](dynamics.py) includes that conversion for candidate-action evaluation. [INTERFACE.md](INTERFACE.md) defines the lifecycle, units, bounds, and scenario fields.
 

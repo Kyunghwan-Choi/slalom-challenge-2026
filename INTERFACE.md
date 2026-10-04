@@ -87,3 +87,20 @@ For Full row `k`, `rows[k]` stores the **state after** `requested_actions[k]`. I
 Finish time is interpolated at the **first forward REF crossing** of `finish_x_m` after all gates. Gate crossings are interpolated at cone X planes. Cone, road, and vehicle limits are checked every **0.001 s** physics step. `last_cone_time_s` is the eighth gate crossing, not finish time. At cone $j$, the crossing must satisfy $\sigma_j(Y_{\rm REF}(t_j)-Y_j)>0$; $\sigma_j$ is its required pass-side sign and $Y_j$ is its center's lateral position. Equality or the wrong side fails. There is no fixed lateral gate distance, and cone contact and footprint checks are separate.
 
 The local runner records wall-clock action latency but imposes no computation deadline (`timing_enforced: false`); the evaluation budget will be announced separately. Evaluation imports must work in the supplied Conda environment; see [submission requirements](SUBMISSION_AND_AI.md).
+
+### Diagnose a failed drive
+
+Check `status`, `error`, `final_state`, and `gates_passed` in `result.json`, then inspect the trajectory or rerun with `--visual`.
+
+| `status` | What to check |
+|---|---|
+| `cone_contact` | Physical contact **or** scored footprint overlap; passing on the correct side alone is insufficient |
+| `road_departure` | The whole COM-centered rectangle must stay on the road, including while turning |
+| `wrong_gate_side` | REF's interpolated crossing of the next cone plane must have the required signed lateral offset |
+| `speed_limit` | Both COM body-forward speed and global REF X progress speed have upper limits |
+| `heading_limit` / `reverse_limit` | Heading magnitude / COM body-forward speed crossed its bound |
+| `controller_error` | Read `error`; check action keys, finite Python numbers, ranges, and controller exceptions |
+| `timeout` | The car did not finish within 60 s of simulation time |
+| `window_closed` | The visual window was closed before the episode ended; rerun to complete it |
+
+Malformed plans, import/reset errors, and simulator exceptions may produce only a terminal error. A valid Easy plan can still fail physically; its planning cost is not the performance score.

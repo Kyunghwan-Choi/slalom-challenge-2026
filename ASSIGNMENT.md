@@ -72,7 +72,7 @@ See [Submission and AI use](SUBMISSION_AND_AI.md) for the report template and fi
 ## Assessment
 
 - **Performance:** Evaluation is primarily based on finish time. A failed run receives the minimum performance score.
-- **Course-based design and understanding:** Even a successful run may lose credit if either is insufficient, as assessed through your code, report, and **individual Q&A** on November 3.
+- **Course-based design and understanding:** Even a successful run may lose credit if either is insufficient, as assessed through your code, report, and **individual Q&A** on November 3. Directly implemented DP and textbook TD/Q-learning methods are eligible; neural networks are not required.
 - **Generic RL libraries:** Using a generic RL library as the submitted solution receives **zero credit**.
 
 Absolute-time thresholds and points will be announced separately.
